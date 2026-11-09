@@ -1,0 +1,13 @@
+.presentation-mirror {
+    background-color: black;
+}
+
+.presentation-cursor {
+    border-radius: 9px;
+    border: 2px solid white;
+    background-color: -st-accent-color;
+}
+
+.presentation-active .system-status-icon {
+    color: #e01b24;
+}

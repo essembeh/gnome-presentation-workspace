@@ -1,0 +1,10 @@
+{
+    "uuid": "presentation-workspace@essembeh.org",
+    "name": "Presentation workspace",
+    "description": "Present on the secondary screen in extended mode: workspace 1 of the primary screen mirrors what the room sees, the other workspaces stay private",
+    "shell-version": ["50"],
+    "version": 1,
+    "version-name": "1",
+    "settings-schema": "org.gnome.shell.extensions.presentation-workspace",
+    "url": "https://github.com/essembeh/gnome-presentation-workspace"
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.presentation-workspace" path="/org/gnome/shell/extensions/presentation-workspace/">
+    <key name="warp-pointer" type="b">
+      <default>false</default>
+      <summary>Move the pointer with workspace 1</summary>
+      <description>Arriving on workspace 1 puts the pointer at the center of the secondary screen; leaving it with the pointer still there brings it back to the center of the primary screen.</description>
+    </key>
+    <key name="auto-share" type="b">
+      <default>false</default>
+      <summary>Windows opened on workspace 1 go to the secondary screen</summary>
+      <description>While the mode is on, a window arriving on workspace 1 of the primary screen (new, or moved there) is sent to the secondary screen. Windows already there when the mode turns on are left alone.</description>
+    </key>
+    <key name="share-shortcut" type="b">
+      <default>true</default>
+      <summary>Share window shortcut</summary>
+      <description>Enable the share-window shortcut.</description>
+    </key>
+    <key name="share-window" type="as">
+      <default><![CDATA[['<Super><Shift>p']]]></default>
+      <summary>Share or take back the focused window</summary>
+      <description>Sends the focused window to the secondary screen, or brings it back to the primary one. Not in the menu: change it with gsettings or dconf.</description>
+    </key>
+    <key name="mute-notifications" type="b">
+      <default>true</default>
+      <summary>Do Not Disturb while presenting</summary>
+      <description>Turn notification banners off while the presentation mode is on, and restore them after.</description>
+    </key>
+    <key name="banners-muted" type="b">
+      <default>false</default>
+      <summary>Internal: banners muted by the extension</summary>
+      <description>Set while the extension holds the notification banners off, so they are restored even after a crash.</description>
+    </key>
+  </schema>
+</schemalist>
