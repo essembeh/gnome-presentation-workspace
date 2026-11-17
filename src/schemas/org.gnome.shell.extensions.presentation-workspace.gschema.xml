@@ -17,7 +17,7 @@
       <description>Enable the share-window shortcut.</description>
     </key>
     <key name="share-window" type="as">
-      <default><![CDATA[['<Super><Shift>p']]]></default>
+      <default><![CDATA[['<Super>e']]]></default>
       <summary>Share or take back the focused window</summary>
       <description>Sends the focused window to the secondary screen, or brings it back to the primary one. Not in the menu: change it with gsettings or dconf.</description>
     </key>

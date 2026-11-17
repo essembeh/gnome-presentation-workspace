@@ -197,7 +197,7 @@ secondaire des fenêtres ouvertes sur le bureau 1 (§4.7).
     (fenêtre ouverte directement sur l'écran secondaire, bureau disparu), le bureau
     courant — **jamais le bureau 1 quand le mode est allumé** : elle serait cachée
     sous le retour ; elle va alors sur le bureau 2.
-- Défaut proposé : **`Super+Shift+P`** (`Super+P` est déjà le sélecteur d'affichage
+- Défaut : **`Super+E`** (« écran » ; `Super+P` est déjà le sélecteur d'affichage
   de GNOME). Activable dans le menu ; la combinaison elle-même ne se change qu'avec
   `gsettings`/dconf (clé `share-window`) — pas de saisie de raccourci dans un menu.
 - Actif **dès qu'un écran secondaire est présent**, mode allumé ou non.
@@ -381,7 +381,7 @@ pouvoir le couper sans toucher au reste.
 | `warp-pointer`       | bool | `false`               | le curseur suit le bureau 1 (§4.6)  | oui         |
 | `auto-share`         | bool | `false`               | bureau 1 → écran secondaire (§4.7)  | oui         |
 | `share-shortcut`     | bool | `true`                | raccourci partager/reprendre (§4.4) | oui         |
-| `share-window`       | as   | `['<Super><Shift>p']` | la combinaison du raccourci         | non (dconf) |
+| `share-window`       | as   | `['<Super>e']`        | la combinaison du raccourci         | non (dconf) |
 | `mute-notifications` | bool | `true`                | Ne pas déranger auto (§4.5)         | oui         |
 | `banners-muted`      | bool | `false`               | état interne de §4.5                | non         |
 

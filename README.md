@@ -41,7 +41,7 @@ of the projected one, workspaces 2, 3… stay private.
   windows slide one workspace to the right, untouched.
 - 🎞️ **Fullscreen slides keep moving.** A fullscreen window on the secondary screen
   normally bypasses the compositor and would freeze the copy; not while presenting.
-- ⌨️ **`Super+Shift+P` shares the focused window** — sends it to the secondary screen,
+- ⌨️ **`Super+E` shares the focused window** — sends it to the secondary screen,
   or brings it back to the workspace it came from.
 - 🔕 **Do Not Disturb while presenting**, and your previous setting back afterwards —
   even if GNOME Shell crashes in between.
@@ -55,7 +55,7 @@ of the projected one, workspaces 2, 3… stay private.
 | Presentation mode                         | the mode itself; greyed out without a secondary screen            | off     |
 | Pointer follows workspace 1               | entering workspace 1 jumps the pointer to the secondary screen    | off     |
 | Workspace 1 opens on the secondary screen | a window opened or moved to workspace 1 goes to the public screen | off     |
-| Share window shortcut                     | enables `Super+Shift+P`                                           | on      |
+| Share window shortcut                     | enables `Super+E`                                                 | on      |
 | Do Not Disturb                            | mutes notification banners while presenting                       | on      |
 
 The options switch a behavior on or off; they do not tune it. Toggling one keeps the
@@ -74,7 +74,7 @@ lands on the secondary screen instead of hiding under the copy. Windows that wer
 workspace 1 before the mode turned on are never shown to the room: they moved to
 workspace 2.
 
-**The shortcut** — `Super+Shift+P` on a window of the primary screen sends it to the
+**The shortcut** — `Super+E` on a window of the primary screen sends it to the
 secondary screen; on a window of the secondary screen, brings it back to the workspace
 it came from and switches there (never to workspace 1 while presenting). It works
 whether the mode is on or not. GNOME already has `Super+Shift+←/→`; this one needs no
@@ -82,7 +82,7 @@ thinking about which side the screen is on. To change the key:
 
 ```bash
 gsettings --schemadir ~/.local/share/gnome-shell/extensions/presentation-workspace@essembeh.org/schemas \
-  set org.gnome.shell.extensions.presentation-workspace share-window "['<Super><Shift>o']"
+  set org.gnome.shell.extensions.presentation-workspace share-window "['<Super>x']"
 ```
 
 ## Which screen is which
