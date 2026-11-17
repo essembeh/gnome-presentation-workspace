@@ -7,6 +7,7 @@ import * as Signals from 'resource:///org/gnome/shell/misc/signals.js';
 
 import {center, contains, pointerTarget} from './geometry.js';
 import {Mirror} from './mirror.js';
+import {TopEdge} from './topedge.js';
 
 // The shell's keep-alive is a one-shot timer: re-arm it well before it expires.
 const KEEP_ALIVE_MS = 60 * 60 * 1000;
@@ -68,6 +69,7 @@ export class PresentationMode extends Signals.EventEmitter {
         this._pending = new Set();
         this._laterIds = new Set();
         this._workspaceIndex = -1;
+        this._topEdge = null;
         this._cursorTracker = global.backend.get_cursor_tracker();
         this._seat = global.stage.get_context().get_backend().get_default_seat();
 
@@ -106,7 +108,10 @@ export class PresentationMode extends Signals.EventEmitter {
         global.workspace_manager.connectObject(
             'active-workspace-changed', () => this._onWorkspaceChanged(), this);
         Main.overview.connectObject(
-            'showing', () => this._updateVisibility(),
+            'showing', () => {
+                this._updateVisibility();
+                this._topEdge?.reset();
+            },
             'hidden', () => this._updateVisibility(), this);
 
         this._keepWorkspaceAlive();
@@ -124,8 +129,10 @@ export class PresentationMode extends Signals.EventEmitter {
         if (this._settings.get_boolean('mute-notifications'))
             force(this._settings, 'banners');
         this._settings.connectObject(
-            'changed::switcher-secondary', () => this._syncSwitcher(), this);
+            'changed::switcher-secondary', () => this._syncSwitcher(),
+            'changed::top-edge', () => this._syncTopEdge(), this);
         this._syncSwitcher();
+        this._syncTopEdge();
         this.emit('changed');
     }
 
@@ -149,6 +156,8 @@ export class PresentationMode extends Signals.EventEmitter {
         this._laterIds.forEach(id => laters.remove(id));
         this._laterIds.clear();
 
+        this._topEdge?.destroy();
+        this._topEdge = null;
         this._cursorTracker.disconnectObject(this);
         this._settings.disconnectObject(this);
         Main.overview.disconnectObject(this);
@@ -196,9 +205,11 @@ export class PresentationMode extends Signals.EventEmitter {
             return;
         }
         this._updateGeometry();
+        this._topEdge?.update();
     }
 
     _onWorkspaceChanged() {
+        this._topEdge?.reset();
         this._keepWorkspaceAlive();
         this._updateVisibility();
         this._warpPointer();
@@ -215,6 +226,16 @@ export class PresentationMode extends Signals.EventEmitter {
             force(this._settings, 'switcher');
         else
             release(this._settings, 'switcher');
+    }
+
+    _syncTopEdge() {
+        const wanted = this._settings.get_boolean('top-edge');
+        if (wanted && !this._topEdge) {
+            this._topEdge = new TopEdge(() => secondaryMonitor(), () => this._mirror.visible);
+        } else if (!wanted && this._topEdge) {
+            this._topEdge.destroy();
+            this._topEdge = null;
+        }
     }
 
     /** Workspace 1 is the secondary screen: the pointer follows workspace switches in and out of it. */
@@ -242,6 +263,7 @@ export class PresentationMode extends Signals.EventEmitter {
     _updateVisibility() {
         this._mirror.visible = global.workspace_manager.get_active_workspace_index() === 0 &&
             !Main.overview.visible;
+        this._topEdge?.sync();
     }
 
     _keepWorkspaceAlive() {

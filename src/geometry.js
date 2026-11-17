@@ -51,3 +51,44 @@ export function returnWorkspace(origin, active, count, mirrorOn) {
         return active;
     return count > 1 ? 1 : active;
 }
+
+/** Stage rectangle of the secondary screen as drawn in the mirror, with its scale. */
+export function mirrorView(workArea, secondary) {
+    const fit = letterbox(workArea.width, workArea.height, secondary.width, secondary.height);
+    return {
+        x: workArea.x + fit.x,
+        y: workArea.y + fit.y,
+        width: fit.width,
+        height: fit.height,
+        scale: fit.scale,
+    };
+}
+
+/** Where a secondary screen column appears in the mirror. */
+export function toMirrorX(view, secondary, x) {
+    return Math.round(view.x + (x - secondary.x) * view.scale);
+}
+
+/** The secondary screen column under a mirror column; the black bands map to its sides. */
+export function toSecondaryX(view, secondary, x) {
+    const column = Math.round(secondary.x + (x - view.x) / view.scale);
+    return Math.min(Math.max(column, secondary.x), secondary.x + secondary.width - 1);
+}
+
+/**
+ * Parts of the secondary screen's top edge with no monitor above, as [x1, x2] pairs:
+ * a barrier there must not block the way to a screen stacked on top.
+ */
+export function topEdge(secondary, monitors) {
+    let segments = [[secondary.x, secondary.x + secondary.width]];
+    for (const monitor of monitors) {
+        if (monitor === secondary || monitor.y + monitor.height !== secondary.y)
+            continue;
+        const left = monitor.x;
+        const right = monitor.x + monitor.width;
+        segments = segments
+            .flatMap(([x1, x2]) => [[x1, Math.min(x2, left)], [Math.max(x1, right), x2]])
+            .filter(([x1, x2]) => x2 > x1);
+    }
+    return segments;
+}

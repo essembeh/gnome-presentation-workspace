@@ -9,6 +9,7 @@ const OPTIONS = [
     ['warp-pointer', 'Pointer follows workspace 1'],
     ['auto-share', 'Workspace 1 opens on the secondary screen'],
     ['share-shortcut', 'Share window shortcut'],
+    ['top-edge', 'Push the top edge to reach the top bar'],
     ['switcher-secondary', 'Alt+Tab on workspace 1: secondary screen only'],
     ['mute-notifications', 'Do Not Disturb'],
 ];

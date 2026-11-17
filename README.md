@@ -43,6 +43,9 @@ of the projected one, workspaces 2, 3… stay private.
   normally bypasses the compositor and would freeze the copy; not while presenting.
 - ⌨️ **`Super+E` shares the focused window** — sends it to the secondary screen,
   or brings it back to the workspace it came from.
+- ⬆️ **Push the top edge to reach the top bar.** On workspace 1, push the pointer
+  against the top of the secondary screen: it lands on your top bar, right above its
+  place in the copy. Go back down and it returns to the secondary screen.
 - 🔀 **Alt+Tab on workspace 1 lists the secondary screen only** — the windows the
   room sees, not your private ones; everywhere else, Alt+Tab is untouched.
 - 🔕 **Do Not Disturb while presenting**, and your previous setting back afterwards —
@@ -58,6 +61,7 @@ of the projected one, workspaces 2, 3… stay private.
 | Pointer follows workspace 1               | entering workspace 1 jumps the pointer to the secondary screen    | off     |
 | Workspace 1 opens on the secondary screen | a window opened or moved to workspace 1 goes to the public screen | off     |
 | Share window shortcut                     | enables `Super+E`                                                 | on      |
+| Push the top edge to reach the top bar    | from the secondary screen's top edge to the top bar, and back     | on      |
 | Alt+Tab on workspace 1: secondary only    | on workspace 1, Alt+Tab lists the secondary screen's windows      | on      |
 | Do Not Disturb                            | mutes notification banners while presenting                       | on      |
 
@@ -87,6 +91,14 @@ thinking about which side the screen is on. To change the key:
 gsettings --schemadir ~/.local/share/gnome-shell/extensions/presentation-workspace@essembeh.org/schemas \
   set org.gnome.shell.extensions.presentation-workspace share-window "['<Super>x']"
 ```
+
+**Push the top edge to reach the top bar** — on workspace 1 your top bar sits right
+above the copy, so the reflex is to move the pointer up to it; but the pointer is on
+the secondary screen, which has no top bar. Push against its top edge (a push like
+GNOME's hot corner, not a touch: tabs and slide toolbars up there still work) and the
+pointer jumps to the top bar, above where it was in the copy. Leave the top bar
+downward and it goes back to the same column of the secondary screen — unless you
+opened a top bar menu in between.
 
 **Alt+Tab on workspace 1** — the switcher shows up on the primary screen only, so from
 workspace 1 it is how you reach a projected window. While you are on workspace 1 with

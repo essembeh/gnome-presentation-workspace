@@ -41,5 +41,10 @@
       <summary>Internal: application switcher restricted by the extension</summary>
       <description>Set while the extension holds the switcher on the current workspace, so it is restored even after a crash.</description>
     </key>
+    <key name="top-edge" type="b">
+      <default>true</default>
+      <summary>Push the top edge of the secondary screen to reach the top bar</summary>
+      <description>On workspace 1, pushing the pointer against the top edge of the secondary screen moves it to the top bar, above its place in the mirror; leaving the top bar downward takes it back.</description>
+    </key>
   </schema>
 </schemalist>

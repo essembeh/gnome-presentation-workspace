@@ -283,6 +283,57 @@ secondaire, alors que depuis le bureau 1 on cherche une fenêtre **projetée**.
 - Seul le sélecteur d'applications est concerné ; le sélecteur de fenêtres
   (`switch-windows`) garde son propre réglage.
 
+### 4.9 Le bord haut mène à la topbar
+
+Sur le bureau 1, la topbar de l'écran principal est posée juste au-dessus du retour :
+le bord haut de l'écran secondaire, vu dans le retour, touche la topbar. Le réflexe
+de monter la souris vers la topbar bute pourtant sur le bord haut de l'écran
+secondaire, qui n'a pas de topbar.
+
+- **Aller** : mode allumé, bureau 1 affiché, hors vue d'ensemble. **Pousser** le
+  pointeur contre le bord haut de l'écran secondaire le place sur la topbar, **juste
+  au-dessus de la pastille** dans le retour : même colonne, calculée avec le
+  letterbox du retour (§5.1), au milieu de la hauteur de la topbar.
+- Une **poussée**, pas un contact : barrière de pression avec le seuil du coin actif
+  de GNOME (100 px en 1 s). Les onglets d'un navigateur maximisé ou la barre d'outils
+  d'un diaporama plein écran, en haut de l'écran secondaire, restent utilisables.
+- **Retour** : arrivé par une poussée, le pointeur qui **ressort de la topbar par le
+  bas** (donc dans le retour) revient sur l'écran secondaire, à la colonne
+  correspondante, sur son bord haut. Les bandes noires renvoient aux côtés de
+  l'écran.
+- Un **menu de la topbar** (calendrier, notifications, réglages rapides…) suspend le
+  retour sans l'oublier : il s'ouvre par-dessus le retour, y descendre n'est pas
+  revenir. Une fois le menu fermé, le retour reprend **dès que le pointeur est de
+  nouveau sur la topbar** — refermer le menu en cliquant à côté, pointeur sous la
+  topbar, ne renvoie donc pas sur l'écran secondaire par surprise.
+- Le retour est oublié au changement de bureau, à la vue d'ensemble, ou si le
+  pointeur quitte la topbar autrement que par le bas.
+- Arriver dans le retour par un autre chemin ne fait **rien** : sinon le pointeur ne
+  pourrait plus quitter l'écran secondaire. Le retour reste en lecture seule : aucun
+  clic ni aucune touche ne le traverse, seul le pointeur est déplacé (comme §4.6).
+- **Toute la largeur** du bord haut, coin compris, sauf les parties au-dessus
+  desquelles se trouve un autre écran (écrans empilés) : la barrière bloquerait le
+  passage normal.
+- **Coin actif** : si l'écran secondaire est le plus à gauche, GNOME lui pose un coin
+  actif en haut à gauche, qui ouvrirait la vue d'ensemble — précisément là où le
+  réflexe « aller vers Activités » emmène le pointeur. Tant que le retour est
+  affiché, ce coin est coupé (`hotCorners[i].setBarrierSize(0)`) ; il est réarmé dès
+  que le retour disparaît (autre bureau, vue d'ensemble, mode éteint) et quand GNOME
+  reconstruit ses coins (`hot-corners-changed`).
+- Barrières recalculées à chaque changement de disposition des écrans.
+- **Le saut est un mouvement pour Mutter** : un `warp_pointer` en ligne droite est
+  arrêté par les barrières sur son trajet. Constaté en vrai : le pointeur, encore
+  plaqué contre notre barrière, glissait jusqu'à son extrémité puis tombait dans le
+  coin actif de l'écran principal, et toute la distance du saut comptait comme une
+  poussée → vue d'ensemble immédiate. Donc :
+  - notre barrière est **retirée pendant le saut** et recréée 300 ms après (avec un
+    `PressureBarrier` neuf : l'ancien, déclenché, attendrait un `left` qui ne vient
+    jamais) ;
+  - chaque saut passe par la **mi-hauteur des écrans** (plusieurs `warp_pointer`
+    successifs), loin du bord haut et des coins actifs ;
+  - au retour, le pointeur atterrit **juste sous** le bord haut : posé dessus, la
+    barrière compterait l'arrivée comme une poussée.
+
 ---
 
 ## 5. Technique
@@ -376,6 +427,8 @@ l'interrupteur est `setSensitive(false)`.
 | Raccourci                | `Main.wm.addKeybinding`                | faible                |
 | Ne pas déranger          | GSettings, publique                    | faible                |
 | Alt+Tab sur le bureau 1  | GSettings, relue à chaque Alt+Tab      | faible                |
+| Bord haut → topbar       | `Layout.PressureBarrier`, exportée     | moyen                 |
+| Coin actif coupé         | `layoutManager.hotCorners`, interne    | moyen                 |
 
 ### 5.9 Fichiers
 
@@ -385,6 +438,7 @@ l'interrupteur est `setSensitive(false)`.
 | `src/mode.js`               | état du mode, visibilité, DND, bureau 1, curseur |
 | `src/mirror.js`             | le retour : clone, géométrie, pastille           |
 | `src/indicator.js`          | bouton du panel                                  |
+| `src/topedge.js`            | bord haut ↔ topbar (§4.9)                        |
 | `src/geometry.js`           | calculs purs, sans `gi://`, testés sous node     |
 | `src/schemas/*.gschema.xml` | les clés du §6                                   |
 
@@ -406,6 +460,7 @@ pouvoir le couper sans toucher au reste.
 | `banners-muted`      | bool | `false`               | état interne de §4.5                | non         |
 | `switcher-secondary` | bool | `true`                | Alt+Tab sur le bureau 1 (§4.8)      | oui         |
 | `switcher-forced`    | bool | `false`               | état interne de §4.8                | non         |
+| `top-edge`           | bool | `true`                | bord haut → topbar (§4.9)           | oui         |
 
 La pastille du curseur (§4.3) n'est **pas** une option : sans elle le retour perd
 son sens. Les deux comportements qui déplacent pointeur ou fenêtres d'eux-mêmes
