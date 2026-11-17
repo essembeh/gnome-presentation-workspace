@@ -264,6 +264,25 @@ sous le retour.
   dans le signal : une fenêtre ramenée par le raccourci (§4.4) passe par le bureau 1
   avant d'atteindre son bureau, elle ne doit pas repartir.
 
+### 4.8 Alt+Tab sur le bureau 1
+
+Le sélecteur Alt+Tab ne s'affiche que sur l'écran principal. Réglé sur « toutes les
+fenêtres », il mélange depuis le bureau 1 les fenêtres privées et celles de l'écran
+secondaire, alors que depuis le bureau 1 on cherche une fenêtre **projetée**.
+
+- Mode allumé **et bureau 1 actif** : l'extension met
+  `org.gnome.shell.app-switcher current-workspace-only` à `true`. Avec
+  `workspaces-only-on-primary`, les fenêtres de l'écran secondaire sont sur tous les
+  bureaux, et le bureau 1 est vide (§4.2) : Alt+Tab ne liste que l'écran secondaire.
+- Quitter le bureau 1 ou éteindre le mode **restaure la valeur d'origine**. Si elle
+  était déjà à `true`, on n'y touche pas.
+- Le réglage est relu par GNOME **à chaque ouverture** du sélecteur
+  (`altTab.js`, `AppSwitcher`) : pas d'injection dans le code du shell.
+- Mêmes règles que §4.5 : on ne lutte pas contre une modification manuelle, et la
+  clé interne `switcher-forced` permet la restauration après un crash du shell.
+- Seul le sélecteur d'applications est concerné ; le sélecteur de fenêtres
+  (`switch-windows`) garde son propre réglage.
+
 ---
 
 ## 5. Technique
@@ -356,6 +375,7 @@ l'interrupteur est `setSensitive(false)`.
 | Bouton du panel          | `PanelMenu.Button`, stable             | faible                |
 | Raccourci                | `Main.wm.addKeybinding`                | faible                |
 | Ne pas déranger          | GSettings, publique                    | faible                |
+| Alt+Tab sur le bureau 1  | GSettings, relue à chaque Alt+Tab      | faible                |
 
 ### 5.9 Fichiers
 
@@ -384,6 +404,8 @@ pouvoir le couper sans toucher au reste.
 | `share-window`       | as   | `['<Super>e']`        | la combinaison du raccourci         | non (dconf) |
 | `mute-notifications` | bool | `true`                | Ne pas déranger auto (§4.5)         | oui         |
 | `banners-muted`      | bool | `false`               | état interne de §4.5                | non         |
+| `switcher-secondary` | bool | `true`                | Alt+Tab sur le bureau 1 (§4.8)      | oui         |
+| `switcher-forced`    | bool | `false`               | état interne de §4.8                | non         |
 
 La pastille du curseur (§4.3) n'est **pas** une option : sans elle le retour perd
 son sens. Les deux comportements qui déplacent pointeur ou fenêtres d'eux-mêmes

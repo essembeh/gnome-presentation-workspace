@@ -38,12 +38,12 @@ all apply here.
   GNOME's **primary** monitor, the public one the **first non-primary** monitor.
   Code, UI strings and docs say primary/secondary, never laptop/external/projector.
 - **Every side behavior of the mode has its own on/off setting** (pointer warp,
-  auto-share, shortcut, Do Not Disturb). The mirror and its cursor dot are not
+  auto-share, shortcut, Do Not Disturb, Alt+Tab). The mirror and its cursor dot are not
   optional.
   Settings switch a behavior off; they do not tune it.
 - **Whatever the mode changes is restored**: `show-banners` back to its original
-  value, the workspace keep-alive removed — including after a shell crash
-  (`banners-muted`).
+  value, the app switcher's `current-workspace-only` too, the workspace keep-alive
+  removed — including after a shell crash (`banners-muted`, `switcher-forced`).
 - Read-only mirror: no input forwarding through it, ever.
 
 ## Markdown formatting

@@ -18,14 +18,38 @@ export function secondaryMonitor() {
     return monitors.find(m => m.index !== primaryIndex) ?? null;
 }
 
-/** Puts `show-banners` back if this extension muted it and nobody touched it since. */
-export function restoreBanners(settings) {
-    if (!settings.get_boolean('banners-muted'))
+// Desktop settings the mode overrides: [crash flag, schema, key, value while forced].
+const OVERRIDES = {
+    banners: ['banners-muted', 'org.gnome.desktop.notifications', 'show-banners', false],
+    switcher: ['switcher-forced', 'org.gnome.shell.app-switcher', 'current-workspace-only', true],
+};
+
+function force(settings, name) {
+    const [flag, schema, key, value] = OVERRIDES[name];
+    if (settings.get_boolean(flag))
         return;
-    const notifications = new Gio.Settings({schema_id: 'org.gnome.desktop.notifications'});
-    if (!notifications.get_boolean('show-banners'))
-        notifications.set_boolean('show-banners', true);
-    settings.set_boolean('banners-muted', false);
+    const desktop = new Gio.Settings({schema_id: schema});
+    if (desktop.get_boolean(key) === value)
+        return;
+    // Recorded first: if the shell dies now, the next enable() restores it.
+    settings.set_boolean(flag, true);
+    desktop.set_boolean(key, value);
+}
+
+/** Puts an overridden setting back, unless the user changed it since. */
+function release(settings, name) {
+    const [flag, schema, key, value] = OVERRIDES[name];
+    if (!settings.get_boolean(flag))
+        return;
+    const desktop = new Gio.Settings({schema_id: schema});
+    if (desktop.get_boolean(key) === value)
+        desktop.set_boolean(key, !value);
+    settings.set_boolean(flag, false);
+}
+
+/** Restores every desktop setting the mode overrode, including after a shell crash. */
+export function restoreOverrides(settings) {
+    Object.keys(OVERRIDES).forEach(name => release(settings, name));
 }
 
 /**
@@ -97,7 +121,11 @@ export class PresentationMode extends Signals.EventEmitter {
         // Turning the mode on while on workspace 1 counts as arriving on it.
         this._workspaceIndex = -1;
         this._warpPointer();
-        this._muteBanners();
+        if (this._settings.get_boolean('mute-notifications'))
+            force(this._settings, 'banners');
+        this._settings.connectObject(
+            'changed::switcher-secondary', () => this._syncSwitcher(), this);
+        this._syncSwitcher();
         this.emit('changed');
     }
 
@@ -131,7 +159,7 @@ export class PresentationMode extends Signals.EventEmitter {
         this._mirror.destroy();
         this._mirror = null;
 
-        restoreBanners(this._settings);
+        restoreOverrides(this._settings);
         this.emit('changed');
     }
 
@@ -174,6 +202,19 @@ export class PresentationMode extends Signals.EventEmitter {
         this._keepWorkspaceAlive();
         this._updateVisibility();
         this._warpPointer();
+        this._syncSwitcher();
+    }
+
+    /**
+     * On workspace 1, Alt+Tab lists the current workspace only: the secondary screen's
+     * windows, which are on every workspace, since workspace 1 holds nothing else.
+     */
+    _syncSwitcher() {
+        if (this._active && this._settings.get_boolean('switcher-secondary') &&
+            global.workspace_manager.get_active_workspace_index() === 0)
+            force(this._settings, 'switcher');
+        else
+            release(this._settings, 'switcher');
     }
 
     /** Workspace 1 is the secondary screen: the pointer follows workspace switches in and out of it. */
@@ -272,16 +313,5 @@ export class PresentationMode extends Signals.EventEmitter {
         }, this);
         const [x, y] = global.get_pointer();
         this._mirror.setPointer(x, y);
-    }
-
-    _muteBanners() {
-        if (!this._settings.get_boolean('mute-notifications'))
-            return;
-        const notifications = new Gio.Settings({schema_id: 'org.gnome.desktop.notifications'});
-        if (!notifications.get_boolean('show-banners'))
-            return;
-        // Recorded first: if the shell dies now, the next enable() restores them.
-        this._settings.set_boolean('banners-muted', true);
-        notifications.set_boolean('show-banners', false);
     }
 }

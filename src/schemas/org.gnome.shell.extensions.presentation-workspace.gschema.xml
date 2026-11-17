@@ -31,5 +31,15 @@
       <summary>Internal: banners muted by the extension</summary>
       <description>Set while the extension holds the notification banners off, so they are restored even after a crash.</description>
     </key>
+    <key name="switcher-secondary" type="b">
+      <default>true</default>
+      <summary>Alt+Tab on workspace 1 lists the secondary screen only</summary>
+      <description>While the mode is on and workspace 1 is active, the application switcher lists the current workspace only, that is the secondary screen's windows. Restored when leaving workspace 1.</description>
+    </key>
+    <key name="switcher-forced" type="b">
+      <default>false</default>
+      <summary>Internal: application switcher restricted by the extension</summary>
+      <description>Set while the extension holds the switcher on the current workspace, so it is restored even after a crash.</description>
+    </key>
   </schema>
 </schemalist>

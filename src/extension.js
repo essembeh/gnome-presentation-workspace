@@ -5,7 +5,7 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import {returnWorkspace} from './geometry.js';
-import {PresentationMode, restoreBanners, secondaryMonitor} from './mode.js';
+import {PresentationMode, restoreOverrides, secondaryMonitor} from './mode.js';
 import {PresentationIndicator} from './indicator.js';
 
 const SHAREABLE = [Meta.WindowType.NORMAL, Meta.WindowType.DIALOG, Meta.WindowType.MODAL_DIALOG];
@@ -14,7 +14,7 @@ export default class PresentationWorkspaceExtension extends Extension {
     enable() {
         this._settings = this.getSettings();
         // The shell may have died with the mode on and the banners muted.
-        restoreBanners(this._settings);
+        restoreOverrides(this._settings);
 
         this._mode = new PresentationMode(this._settings);
         this._indicator = new PresentationIndicator(this._mode, this._settings);
