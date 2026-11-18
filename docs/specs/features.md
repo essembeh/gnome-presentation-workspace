@@ -264,7 +264,7 @@ sous le retour.
   dans le signal : une fenêtre ramenée par le raccourci (§4.4) passe par le bureau 1
   avant d'atteindre son bureau, elle ne doit pas repartir.
 
-### 4.8 Alt+Tab sur le bureau 1
+### 4.8 Alt+Tab suit le bureau 1
 
 Le sélecteur Alt+Tab ne s'affiche que sur l'écran principal. Réglé sur « toutes les
 fenêtres », il mélange depuis le bureau 1 les fenêtres privées et celles de l'écran
@@ -297,6 +297,18 @@ secondaire, qui n'a pas de topbar.
 - Une **poussée**, pas un contact : barrière de pression avec le seuil du coin actif
   de GNOME (100 px en 1 s). Les onglets d'un navigateur maximisé ou la barre d'outils
   d'un diaporama plein écran, en haut de l'écran secondaire, restent utilisables.
+- **Depuis un autre bureau** : choisir avec Alt+Tab une fenêtre de l'écran
+  secondaire **bascule sur le bureau 1** (`activate_with_focus`, la fenêtre garde le
+  focus) — on ne perd pas le fil de la présentation en restant sur un bureau privé.
+  Avec §4.6, le pointeur suit.
+- **Alt+Tab seulement, pas le focus** : un clic sur le diaporama projeté depuis le
+  bureau 3 (pour passer au slide suivant en lisant ses notes) ne doit pas faire
+  disparaître les notes. On s'accroche donc à la fin du sélecteur
+  (`AppSwitcherPopup._finish`, via `InjectionManager`), pas à `focus-window`.
+- Alt+Tab choisit une **application** : si elle a une fenêtre projetée et une privée,
+  la plus récente est activée ; on ne bascule que si c'est la projetée.
+- **Une seule option** pour les deux comportements (même intention : Alt+Tab ne fait
+  pas perdre le fil). Coupée, c'est l'Alt+Tab de GNOME, sans retouche.
 - **Retour** : arrivé par une poussée, le pointeur qui **ressort de la topbar par le
   bas** (donc dans le retour) revient sur l'écran secondaire, à la colonne
   correspondante, sur son bord haut. Les bandes noires renvoient aux côtés de
@@ -442,6 +454,7 @@ l'interrupteur est `setSensitive(false)`.
 | `src/geometry.js`           | calculs purs, sans `gi://`, testés sous node     |
 | `src/schemas/*.gschema.xml` | les clés du §6                                   |
 
+| Alt+Tab vers le bureau 1 | `AppSwitcherPopup._finish`, interne    | moyen                 |
 ---
 
 ## 6. Réglages
@@ -458,7 +471,7 @@ pouvoir le couper sans toucher au reste.
 | `share-window`       | as   | `['<Super>e']`        | la combinaison du raccourci         | non (dconf) |
 | `mute-notifications` | bool | `true`                | Ne pas déranger auto (§4.5)         | oui         |
 | `banners-muted`      | bool | `false`               | état interne de §4.5                | non         |
-| `switcher-secondary` | bool | `true`                | Alt+Tab sur le bureau 1 (§4.8)      | oui         |
+| `switcher-secondary` | bool | `true`                | Alt+Tab suit le bureau 1 (§4.8)     | oui         |
 | `switcher-forced`    | bool | `false`               | état interne de §4.8                | non         |
 | `top-edge`           | bool | `true`                | bord haut → topbar (§4.9)           | oui         |
 

@@ -46,8 +46,9 @@ of the projected one, workspaces 2, 3… stay private.
 - ⬆️ **Push the top edge to reach the top bar.** On workspace 1, push the pointer
   against the top of the secondary screen: it lands on your top bar, right above its
   place in the copy. Go back down and it returns to the secondary screen.
-- 🔀 **Alt+Tab on workspace 1 lists the secondary screen only** — the windows the
-  room sees, not your private ones; everywhere else, Alt+Tab is untouched.
+- 🔀 **Alt+Tab follows workspace 1.** On workspace 1 it lists the windows the room
+  sees, not your private ones; from a private workspace, picking a projected window
+  takes you back to workspace 1.
 - 🔕 **Do Not Disturb while presenting**, and your previous setting back afterwards —
   even if GNOME Shell crashes in between.
 
@@ -100,11 +101,14 @@ pointer jumps to the top bar, above where it was in the copy. Leave the top bar
 downward and it goes back to the same column of the secondary screen — unless you
 opened a top bar menu in between.
 
-**Alt+Tab on workspace 1** — the switcher shows up on the primary screen only, so from
-workspace 1 it is how you reach a projected window. While you are on workspace 1 with
-the mode on, the extension sets GNOME's own *current workspace only* switch for
+**Alt+Tab follows workspace 1** — the switcher shows up on the primary screen only, so
+from workspace 1 it is how you reach a projected window. While you are on workspace 1
+with the mode on, the extension sets GNOME's own *current workspace only* switch for
 Alt+Tab: workspace 1 is empty and the secondary screen's windows are on every
-workspace, so only they are listed. Leave workspace 1 and your setting is back.
+workspace, so only they are listed. Leave workspace 1 and your setting is back. From
+a private workspace, Alt+Tab to a projected window switches to workspace 1, so you do
+not lose track of the presentation. Only Alt+Tab does this: clicking the projected
+slides from your notes workspace leaves you there.
 
 ## Which screen is which
 

@@ -2,6 +2,8 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Meta from 'gi://Meta';
 
+import {InjectionManager} from 'resource:///org/gnome/shell/extensions/extension.js';
+import * as AltTab from 'resource:///org/gnome/shell/ui/altTab.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as Signals from 'resource:///org/gnome/shell/misc/signals.js';
 
@@ -70,6 +72,8 @@ export class PresentationMode extends Signals.EventEmitter {
         this._laterIds = new Set();
         this._workspaceIndex = -1;
         this._topEdge = null;
+        this._injections = new InjectionManager();
+        this._switcherPatched = false;
         this._cursorTracker = global.backend.get_cursor_tracker();
         this._seat = global.stage.get_context().get_backend().get_default_seat();
 
@@ -168,6 +172,7 @@ export class PresentationMode extends Signals.EventEmitter {
         this._mirror.destroy();
         this._mirror = null;
 
+        this._unpatchSwitcher();
         restoreOverrides(this._settings);
         this.emit('changed');
     }
@@ -217,15 +222,48 @@ export class PresentationMode extends Signals.EventEmitter {
     }
 
     /**
-     * On workspace 1, Alt+Tab lists the current workspace only: the secondary screen's
-     * windows, which are on every workspace, since workspace 1 holds nothing else.
+     * Alt+Tab follows workspace 1. On it, Alt+Tab lists the current workspace only: the
+     * secondary screen's windows, which are on every workspace, since workspace 1 holds
+     * nothing else. Elsewhere, picking a window of the secondary screen goes to it.
      */
     _syncSwitcher() {
-        if (this._active && this._settings.get_boolean('switcher-secondary') &&
-            global.workspace_manager.get_active_workspace_index() === 0)
+        const enabled = this._active && this._settings.get_boolean('switcher-secondary');
+        if (enabled && global.workspace_manager.get_active_workspace_index() === 0)
             force(this._settings, 'switcher');
         else
             release(this._settings, 'switcher');
+
+        if (!enabled)
+            this._unpatchSwitcher();
+        else if (!this._switcherPatched)
+            this._patchSwitcher();
+    }
+
+    _patchSwitcher() {
+        const mode = this;
+        this._injections.overrideMethod(AltTab.AppSwitcherPopup.prototype, '_finish',
+            original => function (timestamp) {
+                // The window the switcher is about to activate, picked as its _finish does.
+                const icon = this._items[this._selectedIndex];
+                const window = icon?.cachedWindows[Math.max(this._currentWindow, 0)];
+                original.call(this, timestamp);
+                mode._followToMirror(window, timestamp);
+            });
+        this._switcherPatched = true;
+    }
+
+    _unpatchSwitcher() {
+        this._injections.clear();
+        this._switcherPatched = false;
+    }
+
+    /** A window of the secondary screen picked with Alt+Tab from a private workspace. */
+    _followToMirror(window, timestamp) {
+        const manager = global.workspace_manager;
+        if (!this._active || !window || manager.get_active_workspace_index() === 0 ||
+            window.get_monitor() !== secondaryMonitor()?.index)
+            return;
+        manager.get_workspace_by_index(0).activate_with_focus(window, timestamp);
     }
 
     _syncTopEdge() {

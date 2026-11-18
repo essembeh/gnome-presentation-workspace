@@ -33,8 +33,8 @@
     </key>
     <key name="switcher-secondary" type="b">
       <default>true</default>
-      <summary>Alt+Tab on workspace 1 lists the secondary screen only</summary>
-      <description>While the mode is on and workspace 1 is active, the application switcher lists the current workspace only, that is the secondary screen's windows. Restored when leaving workspace 1.</description>
+      <summary>Alt+Tab follows workspace 1</summary>
+      <description>While the mode is on: on workspace 1, the application switcher lists the current workspace only, that is the secondary screen's windows (restored when leaving workspace 1); on another workspace, picking a window of the secondary screen switches to workspace 1. Off: GNOME's own Alt+Tab.</description>
     </key>
     <key name="switcher-forced" type="b">
       <default>false</default>
