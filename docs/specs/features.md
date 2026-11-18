@@ -361,6 +361,28 @@ secondaire, qui n'a pas de topbar.
   - au retour, le pointeur atterrit **juste sous** le bord haut : posé dessus, la
     barrière compterait l'arrivée comme une poussée.
 
+### 4.10 La vue d'ensemble montre le bureau 1
+
+En vue d'ensemble, le retour est masqué (§5.2) : il recouvrirait la vue d'ensemble de
+l'écran principal. L'aperçu du bureau 1 y apparaissait donc **vide** — le bureau 1
+ne contient aucune fenêtre (§4.2), les fenêtres projetées sont sur l'écran
+secondaire, donc dans la vue d'ensemble de l'écran secondaire, que l'on ne voit pas.
+
+- Mode allumé, l'aperçu du bureau 1 **de l'écran principal** accepte aussi les
+  fenêtres de l'écran secondaire : elles y sont rangées comme toutes les fenêtres de
+  la vue d'ensemble.
+- Cliquer l'une d'elles l'active et revient sur le bureau 1 ; la glisser sur
+  l'aperçu d'un bureau privé la ramène sur l'écran principal, dans ce bureau.
+- L'écran secondaire garde sa propre vue d'ensemble : rien ne change pour la salle.
+- Un seul filtre décide des fenêtres d'un aperçu, `Workspace._isMyWindow`
+  (`workspace.js`) : sur ce bureau **et** sur cet écran. On l'élargit via
+  `InjectionManager`, retiré à l'extinction du mode. Pas de réglage : c'est le retour
+  lui-même, prolongé dans la vue d'ensemble.
+- Limites acceptées : à l'ouverture, les aperçus partent de la position réelle des
+  fenêtres, les projetées arrivent donc depuis le côté de l'écran secondaire. Les
+  vignettes de bureaux en haut de la vue d'ensemble (`workspaceThumbnail.js`, un
+  autre filtre) ne sont pas touchées : celle du bureau 1 reste vide.
+
 ---
 
 ## 5. Technique
@@ -455,6 +477,7 @@ l'interrupteur est `setSensitive(false)`.
 | Ne pas déranger          | GSettings, publique                    | faible                |
 | Alt+Tab sur le bureau 1  | GSettings, relue à chaque Alt+Tab      | faible                |
 | Alt+Tab vers le bureau 1 | `AppSwitcherPopup._finish`, interne    | moyen                 |
+| Bureau 1 en vue d'ens.   | `Workspace._isMyWindow`, interne       | moyen                 |
 | Bord haut → topbar       | `Layout.PressureBarrier`, exportée     | moyen                 |
 | Coin actif coupé         | `layoutManager.hotCorners`, interne    | moyen                 |
 
@@ -518,3 +541,11 @@ est une affaire de doigts, pas de réglage fin.
 - **Fenêtres plein écran sur l'écran principal au bureau 1** : un plein écran passe
   au-dessus du chrome ; à vérifier qu'il ne masque pas le retour (cas marginal, le
   bureau 1 est censé rester vide).
+- **Glissement des fenêtres projetées en vue d'ensemble (§4.10)** : GNOME anime chaque
+  aperçu depuis la position réelle de sa fenêtre, les projetées arrivent donc depuis
+  le côté de l'écran secondaire. Correctif possible (~30 lignes) : pour elles,
+  remplacer les accesseurs `boundingBox`/`windowCenter` de `WindowPreview` par leur
+  place dans le retour (`mirrorView`) — elles partiraient d'où on les voit. **Écarté
+  pour l'instant** : purement cosmétique, et ce serait le hook le plus fragile du
+  projet (`Object.defineProperty` sur des accesseurs internes, `InjectionManager` ne
+  sait pas le faire). À reprendre si le glissement gêne vraiment en formation.

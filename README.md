@@ -36,6 +36,8 @@ of the projected one, workspaces 2, 3… stay private.
   no lag, no encoding, near-zero cost.
 - 🔴 **You see the pointer.** A dot marks where the pointer is on the secondary
   screen — on a scaled-down copy, a real arrow would be lost.
+- 🔭 **The overview shows it too.** In the overview, workspace 1 lists the projected
+  windows instead of looking empty; click one to go back to it.
 - 🧹 **Workspace 1 holds nothing else.** Turn the mode on with windows already there:
   an empty workspace is inserted in front of them and becomes workspace 1. Your
   windows slide one workspace to the right, untouched.

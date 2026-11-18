@@ -5,6 +5,7 @@ import Meta from 'gi://Meta';
 import {InjectionManager} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as AltTab from 'resource:///org/gnome/shell/ui/altTab.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as WorkspaceUI from 'resource:///org/gnome/shell/ui/workspace.js';
 import * as Signals from 'resource:///org/gnome/shell/misc/signals.js';
 
 import {center, contains, pointerTarget} from './geometry.js';
@@ -74,6 +75,7 @@ export class PresentationMode extends Signals.EventEmitter {
         this._topEdge = null;
         this._injections = new InjectionManager();
         this._switcherPatched = false;
+        this._overviewInjections = new InjectionManager();
         this._cursorTracker = global.backend.get_cursor_tracker();
         this._seat = global.stage.get_context().get_backend().get_default_seat();
 
@@ -126,6 +128,7 @@ export class PresentationMode extends Signals.EventEmitter {
             });
 
         this._trackCursor();
+        this._patchOverview();
         this._updateVisibility();
         // Turning the mode on while on workspace 1 counts as arriving on it.
         this._workspaceIndex = -1;
@@ -173,6 +176,7 @@ export class PresentationMode extends Signals.EventEmitter {
         this._mirror = null;
 
         this._unpatchSwitcher();
+        this._overviewInjections.clear();
         restoreOverrides(this._settings);
         this.emit('changed');
     }
@@ -255,6 +259,25 @@ export class PresentationMode extends Signals.EventEmitter {
     _unpatchSwitcher() {
         this._injections.clear();
         this._switcherPatched = false;
+    }
+
+    /**
+     * In the overview the mirror is hidden, and workspace 1 of the primary screen would
+     * look empty: its preview takes the secondary screen's windows too (spec §4.10).
+     */
+    _patchOverview() {
+        const mode = this;
+        this._overviewInjections.overrideMethod(WorkspaceUI.Workspace.prototype, '_isMyWindow',
+            original => function (window) {
+                return original.call(this, window) ||
+                    mode._isMirrored(this.metaWorkspace, this.monitorIndex, window);
+            });
+    }
+
+    _isMirrored(workspace, monitorIndex, window) {
+        return this._active && workspace?.index() === 0 &&
+            monitorIndex === Main.layoutManager.primaryIndex &&
+            window.get_monitor() === secondaryMonitor()?.index;
     }
 
     /** A window of the secondary screen picked with Alt+Tab from a private workspace. */
