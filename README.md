@@ -27,9 +27,10 @@ of the projected one, workspaces 2, 3… stay private.
 
 ## What it does
 
-- 📽️ **One button in the top bar.** Red while presenting, plain otherwise. Click it
-  for the mode switch and the preferences. You are not always presenting — the mode
-  is off at every login and turns on in one click.
+- 📽️ **One button in Quick Settings**, next to Wi-Fi and Do Not Disturb, with the
+  preferences one click away. While presenting, a red icon shows in the top bar;
+  otherwise the extension adds nothing there. The mode is off at every login and
+  turns on in one click.
 - 🪞 **Workspace 1 is the room's view.** A live copy of the secondary screen, scaled
   to fit with black bands, drawn under your top bar. Leave workspace 1 and it is
   gone; come back and it is there. It is a compositor clone, not a video capture:
@@ -56,10 +57,14 @@ of the projected one, workspaces 2, 3… stay private.
 
 ## Menu and preferences
 
-The top bar menu holds two things: the **Presentation mode** switch (greyed out
-without a secondary screen) and **Preferences**. The preferences window also opens
-from GNOME's Extensions app, like any extension's. Options are grouped by theme, each
-with a line explaining it, and apply right away, even with the mode on.
+The **Presentation** button sits in GNOME's Quick Settings menu, top right. Click it to
+turn the mode on or off (greyed out without a secondary screen); its arrow opens a
+menu with **Preferences**. The preferences window also opens from GNOME's Extensions
+app, like any extension's.
+Options are grouped by theme, each with a line explaining it, and apply right away,
+even with the mode on.
+
+<p align="center"><img src="docs/images/preferences.png" alt="The preferences window" width="480"></p>
 
 | Group         | Option                                    | Default   |
 | ------------- | ----------------------------------------- | --------- |

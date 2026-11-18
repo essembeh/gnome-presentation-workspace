@@ -8,6 +8,6 @@
     background-color: -st-accent-color;
 }
 
-.presentation-active .system-status-icon {
+.system-status-icon.presentation-indicator {
     color: #e01b24;
 }

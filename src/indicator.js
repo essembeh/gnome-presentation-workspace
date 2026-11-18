@@ -1,52 +1,71 @@
 import GObject from 'gi://GObject';
-import St from 'gi://St';
 
-import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
-import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as QuickSettings from 'resource:///org/gnome/shell/ui/quickSettings.js';
+
+const ICON = 'video-display-symbolic';
+
+/** The Quick Settings button: turns the mode on and off, its menu opens the preferences. */
+const PresentationToggle = GObject.registerClass(
+class PresentationToggle extends QuickSettings.QuickMenuToggle {
+    _init(mode, extension) {
+        super._init({title: 'Presentation', iconName: ICON});
+        this._mode = mode;
+
+        this.menu.setHeader(ICON, 'Presentation mode',
+            'Workspace 1 mirrors the secondary screen');
+        this.menu.addAction('Preferences', () => extension.openPreferences());
+
+        this.connect('clicked', () => {
+            if (this._mode.active)
+                this._mode.deactivate();
+            else
+                this._mode.activate();
+        });
+    }
+
+    sync() {
+        const available = this._mode.available;
+        this.checked = this._mode.active;
+        // Greyed out and not clickable without a secondary screen; the arrow and its
+        // Preferences entry stay usable.
+        this.reactive = available;
+        if (available)
+            this.remove_style_pseudo_class('insensitive');
+        else
+            this.add_style_pseudo_class('insensitive');
+        this.subtitle = available ? null : 'No secondary screen';
+    }
+});
 
 /**
- * Top bar button: red while the presentation mode is on. Its menu holds the mode
- * switch (insensitive without a secondary screen) and opens the preferences.
+ * Spec §4.1: a Quick Settings button, and a red top bar icon only while the mode is
+ * on — nothing in the top bar otherwise.
  */
 export const PresentationIndicator = GObject.registerClass(
-class PresentationIndicator extends PanelMenu.Button {
+class PresentationIndicator extends QuickSettings.SystemIndicator {
     _init(mode, extension) {
-        super._init(0.0, 'Presentation');
+        super._init();
         this._mode = mode;
-        this.add_child(new St.Icon({
-            icon_name: 'video-display-symbolic',
-            style_class: 'system-status-icon',
-        }));
 
-        this._switch = new PopupMenu.PopupSwitchMenuItem('Presentation mode', false);
-        this._switch.connect('toggled', (_item, state) => {
-            if (state)
-                this._mode.activate();
-            else
-                this._mode.deactivate();
-            // activate() is a no-op without a secondary screen: show the real state.
-            this._sync();
-        });
-        this.menu.addMenuItem(this._switch);
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        this.menu.addAction('Preferences', () => extension.openPreferences());
+        this._icon = this._addIndicator();
+        this._icon.icon_name = ICON;
+        this._icon.add_style_class_name('presentation-indicator');
+
+        this._toggle = new PresentationToggle(mode, extension);
+        this.quickSettingsItems.push(this._toggle);
 
         this._mode.connectObject('changed', () => this._sync(), this);
         this._sync();
     }
 
     _sync() {
-        const active = this._mode.active;
-        this._switch.setToggleState(active);
-        this._switch.setSensitive(this._mode.available);
-        if (active)
-            this.add_style_class_name('presentation-active');
-        else
-            this.remove_style_class_name('presentation-active');
+        this._icon.visible = this._mode.active;
+        this._toggle.sync();
     }
 
     destroy() {
         this._mode.disconnectObject(this);
+        this.quickSettingsItems.forEach(item => item.destroy());
         super.destroy();
     }
 });

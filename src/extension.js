@@ -18,7 +18,7 @@ export default class PresentationWorkspaceExtension extends Extension {
 
         this._mode = new PresentationMode(this._settings);
         this._indicator = new PresentationIndicator(this._mode, this);
-        Main.panel.addToStatusArea(this.uuid, this._indicator);
+        Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
 
         // Workspace each shared window came from, to bring it back there. The workspace
         // itself, not its index: inserting the mirror workspace shifts every index.

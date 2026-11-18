@@ -100,25 +100,40 @@ corrige pas.
 
 ## 4. UX
 
-### 4.1 Le bouton du panel — allumer, éteindre, voir l'état
+### 4.1 Les réglages rapides — allumer, éteindre, voir l'état
 
-- Une **icône dans la zone de droite du panel** (status area), présente dès que
-  l'extension est activée.
-- **L'icône dit l'état**, c'est son rôle principal : couleur normale du panel mode
-  éteint, **rouge** mode allumé — le rouge des indicateurs d'enregistrement d'écran
-  de GNOME, pour « ce que tu montres est vu ».
-- **Clic** : ouvre un menu réduit à l'essentiel.
+- Un **bouton dans le menu des réglages rapides** de GNOME (en haut à droite, avec
+  Wi-Fi, Bluetooth, Style sombre, Ne pas déranger…) : un `QuickMenuToggle` de
+  largeur normale. Avec la flèche du sous-menu, « Presentation » est légèrement
+  tronqué : accepté, c'est le libellé le plus clair. Écartés : la double largeur
+  (`colSpan` 2, peu esthétique), un libellé court (« Present », « Presenting »…),
+  un texte plus petit que les autres boutons.
+  - Clic sur le bouton : allume ou éteint le mode. Grisé sans écran secondaire, avec
+    « No secondary screen » en sous-titre.
+  - Sa flèche ouvre un sous-menu avec un en-tête et l'entrée **Preferences**.
 
   ```text
-  ┌──────────────────────────────────────────────┐
-  │ Presentation mode                     [ ●]   │  grisé sans écran secondaire
-  ├──────────────────────────────────────────────┤
-  │ Preferences                                  │  ouvre la fenêtre ci-dessous
-  └──────────────────────────────────────────────┘
+  ┌───────────────────────┐
+  │ ▣ Presentation    ›   │  le bouton, à côté de Wi-Fi, Bluetooth…
+  └───────────────────────┘
+        › ┌──────────────────────────────────────┐
+          │ ▣ Presentation mode                  │  en-tête
+          │   Workspace 1 mirrors the secondary… │
+          ├──────────────────────────────────────┤
+          │ Preferences                          │
+          └──────────────────────────────────────┘
   ```
 
+- **Une icône rouge dans la topbar, seulement mode allumé** (parmi les icônes
+  système, comme celle d'enregistrement d'écran) : « ce que tu montres est vu ».
+  Mode éteint, l'extension n'ajoute **rien** à la topbar.
+- Historique : un bouton dédié dans la topbar, toujours visible, portait d'abord le
+  menu. Les réglages rapides sont l'endroit standard d'un interrupteur de ce genre,
+  et une icône permanente pour un mode qu'on utilise en formation seulement
+  encombrait la topbar.
+
 - **Une fenêtre de préférences** (`prefs.js`, libadwaita), ouverte de deux
-  endroits : l'entrée « Preferences » du menu, et le bouton réglages de
+  endroits : l'entrée « Preferences » du sous-menu, et le bouton réglages de
   l'application Extensions de GNOME, comme pour toute extension.
 - Les options y sont **regroupées par thème**, chacune avec une phrase qui dit ce
   qu'elle fait — le menu, lui, n'en avait pas la place :
@@ -134,7 +149,7 @@ corrige pas.
   exception** : la combinaison du raccourci (§4.4), sous son interrupteur — on clique
   la ligne et on presse la nouvelle combinaison (au moins un modificateur, Retour
   arrière remet `Super+E`, Échap annule).
-- Historique : les options ont d'abord vécu dans le menu, sans fenêtre de
+- Historique : les options ont d'abord vécu dans le menu du bouton, sans fenêtre de
   préférences. À six options sans explication, le menu devenait illisible ; le mode
   se démarre plus souvent qu'il ne se règle.
 
@@ -453,14 +468,18 @@ secondaire → position de la pastille. Connecté seulement mode allumé.
 `Shell.ActionMode.NORMAL`. Cible : `global.display.focus_window`, ignorée si
 `null` ou de type non `NORMAL`/`DIALOG`. `win.move_to_monitor(index)`.
 
-### 5.7 Bouton du panel
+### 5.7 Réglages rapides
 
-`PanelMenu.Button` ajouté par `Main.panel.addToStatusArea(uuid, …)`, menu de
-`PopupSwitchMenuItem` : le mode, puis une option par clé booléenne du §6, liée à
-GSettings dans les deux sens. Une option remplace `activate` par `toggle()` pour ne
-pas émettre `activate`, qui fermerait le menu. État :
-classe CSS `presentation-active` (icône rouge `#e01b24`) ; sans écran secondaire,
-l'interrupteur est `setSensitive(false)`.
+Un `QuickSettings.SystemIndicator` ajouté par
+`Main.panel.statusArea.quickSettings.addExternalIndicator()` — l'API publique des
+extensions pour les réglages rapides. Il porte :
+
+- l'icône de la topbar (`_addIndicator()`), visible seulement mode allumé, rouge
+  `#e01b24` (classe `presentation-indicator`) ;
+- un `QuickMenuToggle` dans `quickSettingsItems` : `checked` suit le mode,
+  `reactive` à `false` et sous-titre « No secondary screen » sans écran secondaire ;
+  son menu a un en-tête (`setHeader`) et l'entrée Preferences
+  (`extension.openPreferences()`).
 
 ### 5.8 Carte des risques
 
@@ -472,7 +491,7 @@ l'interrupteur est `setSensitive(false)`.
 | Bureau 1 libéré          | `Main.wm.insertWorkspace`              | faible                |
 | Clone d'un plein écran   | `global.compositor.disable_unredirect` | faible                |
 | Position du curseur      | `Meta.CursorTracker`, publique         | faible                |
-| Bouton du panel          | `PanelMenu.Button`, stable             | faible                |
+| Réglages rapides         | `addExternalIndicator`, publique       | faible                |
 | Raccourci                | `Main.wm.addKeybinding`                | faible                |
 | Ne pas déranger          | GSettings, publique                    | faible                |
 | Alt+Tab sur le bureau 1  | GSettings, relue à chaque Alt+Tab      | faible                |
@@ -488,7 +507,7 @@ l'interrupteur est `setSensitive(false)`.
 | `src/extension.js`          | `enable()` / `disable()`, raccourci              |
 | `src/mode.js`               | état du mode, visibilité, DND, bureau 1, curseur |
 | `src/mirror.js`             | le retour : clone, géométrie, pastille           |
-| `src/indicator.js`          | bouton du panel                                  |
+| `src/indicator.js`          | réglages rapides et icône de la topbar           |
 | `src/topedge.js`            | bord haut ↔ topbar (§4.9)                        |
 | `src/geometry.js`           | calculs purs, sans `gi://`, testés sous node     |
 | `src/schemas/*.gschema.xml` | les clés du §6                                   |
