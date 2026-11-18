@@ -3,8 +3,8 @@
 `presentation-workspace@essembeh.org` is a GNOME Shell extension for **presenting on a
 secondary screen in extended (joined) mode**: workspace 1 of the primary screen shows
 a live mirror of the secondary screen, the other workspaces stay private. It replaces
-an OBS projector window. A top bar button turns the mode on and off and shows its
-state.
+an OBS projector window. A top bar button turns the mode on and off, shows its
+state and opens the preferences.
 
 GNOME **50** (NixOS stable), pure GJS/ESM, **no build step**. Shipped code lives in
 `src/`, dev helpers in `tests/`.
@@ -40,7 +40,10 @@ all apply here.
 - **Every side behavior of the mode has its own on/off setting** (pointer warp,
   auto-share, shortcut, Do Not Disturb, Alt+Tab, top edge). The mirror and its cursor dot are not
   optional.
-  Settings switch a behavior off; they do not tune it.
+  Settings switch a behavior off; they do not tune it — the share-window key
+  combination is the one exception.
+- **The top bar menu holds the mode switch and "Preferences" only**; the options live
+  in `prefs.js`, grouped by theme with one explanatory line each.
 - **Whatever the mode changes is restored**: `show-banners` back to its original
   value, the app switcher's `current-workspace-only` too, the workspace keep-alive
   removed — including after a shell crash (`banners-muted`, `switcher-forced`).

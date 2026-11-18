@@ -107,21 +107,36 @@ corrige pas.
 - **L'icône dit l'état**, c'est son rôle principal : couleur normale du panel mode
   éteint, **rouge** mode allumé — le rouge des indicateurs d'enregistrement d'écran
   de GNOME, pour « ce que tu montres est vu ».
-- **Clic** : ouvre un menu.
+- **Clic** : ouvre un menu réduit à l'essentiel.
 
   ```text
   ┌──────────────────────────────────────────────┐
   │ Presentation mode                     [ ●]   │  grisé sans écran secondaire
-  ├── Options ───────────────────────────────────┤
-  │ Pointer follows workspace 1           [  ]   │  §4.6
-  │ Workspace 1 opens on the secondary…   [  ]   │  §4.7
-  │ Share window shortcut                 [ ●]   │  §4.4
-  │ Do Not Disturb                        [ ●]   │  §4.5
+  ├──────────────────────────────────────────────┤
+  │ Preferences                                  │  ouvre la fenêtre ci-dessous
   └──────────────────────────────────────────────┘
   ```
 
-- **Pas de fenêtre de préférences** : les réglages sont les interrupteurs du menu.
-  Basculer une option **laisse le menu ouvert** (on en règle souvent plusieurs).
+- **Une fenêtre de préférences** (`prefs.js`, libadwaita), ouverte de deux
+  endroits : l'entrée « Preferences » du menu, et le bouton réglages de
+  l'application Extensions de GNOME, comme pour toute extension.
+- Les options y sont **regroupées par thème**, chacune avec une phrase qui dit ce
+  qu'elle fait — le menu, lui, n'en avait pas la place :
+
+  | Groupe        | Options                                                   |
+  | ------------- | --------------------------------------------------------- |
+  | Pointer       | le curseur suit le bureau 1 (§4.6), bord haut (§4.9)      |
+  | Windows       | bureau 1 → écran secondaire (§4.7), raccourci (§4.4)      |
+  | Alt+Tab       | Alt+Tab suit le bureau 1 (§4.8)                           |
+  | Notifications | Ne pas déranger (§4.5)                                    |
+
+- Des **interrupteurs** : un comportement se coupe, il ne se configure pas (§6). **Une
+  exception** : la combinaison du raccourci (§4.4), sous son interrupteur — on clique
+  la ligne et on presse la nouvelle combinaison (au moins un modificateur, Retour
+  arrière remet `Super+E`, Échap annule).
+- Historique : les options ont d'abord vécu dans le menu, sans fenêtre de
+  préférences. À six options sans explication, le menu devenait illisible ; le mode
+  se démarre plus souvent qu'il ne se règle.
 
 - **Non persistant** : à chaque ouverture de session, le mode est éteint.
 - **Débrancher l'écran secondaire éteint le mode** (et restaure ce qu'il a
@@ -198,8 +213,8 @@ secondaire des fenêtres ouvertes sur le bureau 1 (§4.7).
     courant — **jamais le bureau 1 quand le mode est allumé** : elle serait cachée
     sous le retour ; elle va alors sur le bureau 2.
 - Défaut : **`Super+E`** (« écran » ; `Super+P` est déjà le sélecteur d'affichage
-  de GNOME). Activable dans le menu ; la combinaison elle-même ne se change qu'avec
-  `gsettings`/dconf (clé `share-window`) — pas de saisie de raccourci dans un menu.
+  de GNOME). Activable et **modifiable dans les préférences** (§4.1), clé
+  `share-window`.
 - Actif **dès qu'un écran secondaire est présent**, mode allumé ou non.
 - L'état de la fenêtre (maximisée, plein écran) est conservé : c'est le
   comportement natif de `move_to_monitor`.
@@ -282,6 +297,18 @@ secondaire, alors que depuis le bureau 1 on cherche une fenêtre **projetée**.
   clé interne `switcher-forced` permet la restauration après un crash du shell.
 - Seul le sélecteur d'applications est concerné ; le sélecteur de fenêtres
   (`switch-windows`) garde son propre réglage.
+- **Depuis un autre bureau** : choisir avec Alt+Tab une fenêtre de l'écran
+  secondaire **bascule sur le bureau 1** (`activate_with_focus`, la fenêtre garde le
+  focus) — on ne perd pas le fil de la présentation en restant sur un bureau privé.
+  Avec §4.6, le pointeur suit.
+- **Alt+Tab seulement, pas le focus** : un clic sur le diaporama projeté depuis le
+  bureau 3 (pour passer au slide suivant en lisant ses notes) ne doit pas faire
+  disparaître les notes. On s'accroche donc à la fin du sélecteur
+  (`AppSwitcherPopup._finish`, via `InjectionManager`), pas à `focus-window`.
+- Alt+Tab choisit une **application** : si elle a une fenêtre projetée et une privée,
+  la plus récente est activée ; on ne bascule que si c'est la projetée.
+- **Une seule option** pour les deux comportements (même intention : Alt+Tab ne fait
+  pas perdre le fil). Coupée, c'est l'Alt+Tab de GNOME, sans retouche.
 
 ### 4.9 Le bord haut mène à la topbar
 
@@ -297,18 +324,6 @@ secondaire, qui n'a pas de topbar.
 - Une **poussée**, pas un contact : barrière de pression avec le seuil du coin actif
   de GNOME (100 px en 1 s). Les onglets d'un navigateur maximisé ou la barre d'outils
   d'un diaporama plein écran, en haut de l'écran secondaire, restent utilisables.
-- **Depuis un autre bureau** : choisir avec Alt+Tab une fenêtre de l'écran
-  secondaire **bascule sur le bureau 1** (`activate_with_focus`, la fenêtre garde le
-  focus) — on ne perd pas le fil de la présentation en restant sur un bureau privé.
-  Avec §4.6, le pointeur suit.
-- **Alt+Tab seulement, pas le focus** : un clic sur le diaporama projeté depuis le
-  bureau 3 (pour passer au slide suivant en lisant ses notes) ne doit pas faire
-  disparaître les notes. On s'accroche donc à la fin du sélecteur
-  (`AppSwitcherPopup._finish`, via `InjectionManager`), pas à `focus-window`.
-- Alt+Tab choisit une **application** : si elle a une fenêtre projetée et une privée,
-  la plus récente est activée ; on ne bascule que si c'est la projetée.
-- **Une seule option** pour les deux comportements (même intention : Alt+Tab ne fait
-  pas perdre le fil). Coupée, c'est l'Alt+Tab de GNOME, sans retouche.
 - **Retour** : arrivé par une poussée, le pointeur qui **ressort de la topbar par le
   bas** (donc dans le retour) revient sur l'écran secondaire, à la colonne
   correspondante, sur son bord haut. Les bandes noires renvoient aux côtés de
@@ -439,6 +454,7 @@ l'interrupteur est `setSensitive(false)`.
 | Raccourci                | `Main.wm.addKeybinding`                | faible                |
 | Ne pas déranger          | GSettings, publique                    | faible                |
 | Alt+Tab sur le bureau 1  | GSettings, relue à chaque Alt+Tab      | faible                |
+| Alt+Tab vers le bureau 1 | `AppSwitcherPopup._finish`, interne    | moyen                 |
 | Bord haut → topbar       | `Layout.PressureBarrier`, exportée     | moyen                 |
 | Coin actif coupé         | `layoutManager.hotCorners`, interne    | moyen                 |
 
@@ -454,7 +470,6 @@ l'interrupteur est `setSensitive(false)`.
 | `src/geometry.js`           | calculs purs, sans `gi://`, testés sous node     |
 | `src/schemas/*.gschema.xml` | les clés du §6                                   |
 
-| Alt+Tab vers le bureau 1 | `AppSwitcherPopup._finish`, interne    | moyen                 |
 ---
 
 ## 6. Réglages
@@ -463,12 +478,12 @@ l'interrupteur est `setSensitive(false)`.
 optionnel. **Chaque comportement annexe** que le mode déclenche a son réglage, pour
 pouvoir le couper sans toucher au reste.
 
-| Clé                  | Type | Défaut                | Comportement (§)                    | Menu        |
+| Clé                  | Type | Défaut                | Comportement (§)                    | Préférences |
 | -------------------- | ---- | --------------------- | ----------------------------------- | ----------- |
 | `warp-pointer`       | bool | `false`               | le curseur suit le bureau 1 (§4.6)  | oui         |
 | `auto-share`         | bool | `false`               | bureau 1 → écran secondaire (§4.7)  | oui         |
 | `share-shortcut`     | bool | `true`                | raccourci partager/reprendre (§4.4) | oui         |
-| `share-window`       | as   | `['<Super>e']`        | la combinaison du raccourci         | non (dconf) |
+| `share-window`       | as   | `['<Super>e']`        | la combinaison du raccourci         | oui         |
 | `mute-notifications` | bool | `true`                | Ne pas déranger auto (§4.5)         | oui         |
 | `banners-muted`      | bool | `false`               | état interne de §4.5                | non         |
 | `switcher-secondary` | bool | `true`                | Alt+Tab suit le bureau 1 (§4.8)     | oui         |
@@ -482,7 +497,8 @@ son sens. Les deux comportements qui déplacent pointeur ou fenêtres d'eux-mêm
 Pas d'option de **paramétrage fin** au-delà : le bureau du retour (toujours le 1),
 la couleur de la pastille (accent), le choix de l'écran secondaire (le premier non
 principal) sont des choix de l'extension. Un comportement se coupe, il ne se
-configure pas.
+configure pas — seule exception, la combinaison du raccourci (§4.1, §4.4) : une touche
+est une affaire de doigts, pas de réglage fin.
 
 ---
 

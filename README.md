@@ -28,8 +28,8 @@ of the projected one, workspaces 2, 3… stay private.
 ## What it does
 
 - 📽️ **One button in the top bar.** Red while presenting, plain otherwise. Click it
-  for a menu: the mode switch and a handful of options. You are not always
-  presenting — the mode is off at every login and turns on in one click.
+  for the mode switch and the preferences. You are not always presenting — the mode
+  is off at every login and turns on in one click.
 - 🪞 **Workspace 1 is the room's view.** A live copy of the secondary screen, scaled
   to fit with black bands, drawn under your top bar. Leave workspace 1 and it is
   gone; come back and it is there. It is a compositor clone, not a video capture:
@@ -42,7 +42,7 @@ of the projected one, workspaces 2, 3… stay private.
 - 🎞️ **Fullscreen slides keep moving.** A fullscreen window on the secondary screen
   normally bypasses the compositor and would freeze the copy; not while presenting.
 - ⌨️ **`Super+E` shares the focused window** — sends it to the secondary screen,
-  or brings it back to the workspace it came from.
+  or brings it back to the workspace it came from. The key can be changed.
 - ⬆️ **Push the top edge to reach the top bar.** On workspace 1, push the pointer
   against the top of the secondary screen: it lands on your top bar, right above its
   place in the copy. Go back down and it returns to the secondary screen.
@@ -52,22 +52,25 @@ of the projected one, workspaces 2, 3… stay private.
 - 🔕 **Do Not Disturb while presenting**, and your previous setting back afterwards —
   even if GNOME Shell crashes in between.
 
-![The top bar menu](docs/images/menu.png)
+## Menu and preferences
 
-## The menu
+The top bar menu holds two things: the **Presentation mode** switch (greyed out
+without a secondary screen) and **Preferences**. The preferences window also opens
+from GNOME's Extensions app, like any extension's. Options are grouped by theme, each
+with a line explaining it, and apply right away, even with the mode on.
 
-| Entry                                     | What it does                                                      | Default |
-| ----------------------------------------- | ----------------------------------------------------------------- | ------- |
-| Presentation mode                         | the mode itself; greyed out without a secondary screen            | off     |
-| Pointer follows workspace 1               | entering workspace 1 jumps the pointer to the secondary screen    | off     |
-| Workspace 1 opens on the secondary screen | a window opened or moved to workspace 1 goes to the public screen | off     |
-| Share window shortcut                     | enables `Super+E`                                                 | on      |
-| Push the top edge to reach the top bar    | from the secondary screen's top edge to the top bar, and back     | on      |
-| Alt+Tab on workspace 1: secondary only    | on workspace 1, Alt+Tab lists the secondary screen's windows      | on      |
-| Do Not Disturb                            | mutes notification banners while presenting                       | on      |
+| Group         | Option                                    | Default   |
+| ------------- | ----------------------------------------- | --------- |
+| Pointer       | Pointer follows workspace 1               | off       |
+| Pointer       | Push the top edge to reach the top bar    | on        |
+| Windows       | Workspace 1 opens on the secondary screen | off       |
+| Windows       | Share window shortcut                     | on        |
+| Windows       | Shortcut                                  | `Super+E` |
+| Alt+Tab       | Alt+Tab follows workspace 1               | on        |
+| Notifications | Do Not Disturb while presenting           | on        |
 
-The options switch a behavior on or off; they do not tune it. Toggling one keeps the
-menu open.
+The options switch a behavior on or off; they do not tune it — the shortcut's key is
+the one exception.
 
 **Pointer follows workspace 1** — moving from one screen to the other means dragging
 the pointer across the edge. With this on, arriving on workspace 1 (trackpad gesture,
@@ -86,12 +89,8 @@ workspace 2.
 secondary screen; on a window of the secondary screen, brings it back to the workspace
 it came from and switches there (never to workspace 1 while presenting). It works
 whether the mode is on or not. GNOME already has `Super+Shift+←/→`; this one needs no
-thinking about which side the screen is on. To change the key:
-
-```bash
-gsettings --schemadir ~/.local/share/gnome-shell/extensions/presentation-workspace@essembeh.org/schemas \
-  set org.gnome.shell.extensions.presentation-workspace share-window "['<Super>x']"
-```
+thinking about which side the screen is on. To change the key, click the *Shortcut*
+row in the preferences and press the new combination (Backspace restores `Super+E`).
 
 **Push the top edge to reach the top bar** — on workspace 1 your top bar sits right
 above the copy, so the reflex is to move the pointer up to it; but the pointer is on

@@ -4,26 +4,15 @@ import St from 'gi://St';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
-// One switch per side behavior of the mode (spec §6).
-const OPTIONS = [
-    ['warp-pointer', 'Pointer follows workspace 1'],
-    ['auto-share', 'Workspace 1 opens on the secondary screen'],
-    ['share-shortcut', 'Share window shortcut'],
-    ['top-edge', 'Push the top edge to reach the top bar'],
-    ['switcher-secondary', 'Alt+Tab follows workspace 1'],
-    ['mute-notifications', 'Do Not Disturb'],
-];
-
 /**
  * Top bar button: red while the presentation mode is on. Its menu holds the mode
- * switch (insensitive without a secondary screen) and the option switches.
+ * switch (insensitive without a secondary screen) and opens the preferences.
  */
 export const PresentationIndicator = GObject.registerClass(
 class PresentationIndicator extends PanelMenu.Button {
-    _init(mode, settings) {
+    _init(mode, extension) {
         super._init(0.0, 'Presentation');
         this._mode = mode;
-        this._settings = settings;
         this.add_child(new St.Icon({
             icon_name: 'video-display-symbolic',
             style_class: 'system-status-icon',
@@ -39,21 +28,11 @@ class PresentationIndicator extends PanelMenu.Button {
             this._sync();
         });
         this.menu.addMenuItem(this._switch);
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Options'));
-        OPTIONS.forEach(([key, label]) => this.menu.addMenuItem(this._optionItem(key, label)));
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.menu.addAction('Preferences', () => extension.openPreferences());
 
         this._mode.connectObject('changed', () => this._sync(), this);
         this._sync();
-    }
-
-    _optionItem(key, label) {
-        const item = new PopupMenu.PopupSwitchMenuItem(label, this._settings.get_boolean(key));
-        // Toggle without the 'activate' emission, so the menu stays open.
-        item.activate = () => item.toggle();
-        item.connect('toggled', (_item, state) => this._settings.set_boolean(key, state));
-        this._settings.connectObject(`changed::${key}`,
-            () => item.setToggleState(this._settings.get_boolean(key)), this);
-        return item;
     }
 
     _sync() {
@@ -68,7 +47,6 @@ class PresentationIndicator extends PanelMenu.Button {
 
     destroy() {
         this._mode.disconnectObject(this);
-        this._settings.disconnectObject(this);
         super.destroy();
     }
 });

@@ -17,7 +17,7 @@ export default class PresentationWorkspaceExtension extends Extension {
         restoreOverrides(this._settings);
 
         this._mode = new PresentationMode(this._settings);
-        this._indicator = new PresentationIndicator(this._mode, this._settings);
+        this._indicator = new PresentationIndicator(this._mode, this);
         Main.panel.addToStatusArea(this.uuid, this._indicator);
 
         // Workspace each shared window came from, to bring it back there. The workspace
