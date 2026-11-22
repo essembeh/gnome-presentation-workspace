@@ -2,10 +2,10 @@
 
 # 📽️ Presentation workspace
 
-**Present on the second screen. See what the room sees. Keep the rest private.**
+**Project workspace 1. Keep the others private.**
 
-*No OBS. No screen capture. A GNOME Shell extension that turns workspace 1 into a live
-view of the screen behind you.*
+*For anyone who projects their screen, to present or to teach. A GNOME Shell extension
+that completes extended mode and makes it feel like GNOME projects a single workspace.*
 
 [![build](https://github.com/essembeh/gnome-presentation-workspace/actions/workflows/build.yml/badge.svg)](https://github.com/essembeh/gnome-presentation-workspace/actions/workflows/build.yml)
 [![GNOME Shell 50](https://img.shields.io/badge/GNOME%20Shell-50-4A86CF?logo=gnome&logoColor=white)](https://release.gnome.org/)
@@ -15,31 +15,52 @@ view of the screen behind you.*
 
 ---
 
-You give a training. Your laptop drives a projector in **extended** mode: what you put
-on the projector, the room sees; your laptop screen keeps your notes, your mail, your
-private stuff. Only the projector is **behind you** — so you end up turning around, or
-running an OBS projector window just to see what you are showing.
+You give a talk or teach a class, with your laptop connected to a projector or a large
+screen. GNOME offers two modes, and neither is quite right:
 
-This extension replaces that OBS window: workspace 1 of your screen shows a live copy
-of the projected one, workspaces 2, 3… stay private.
+- **Mirror** shows the room everything: your notes, your mail, your notifications.
+- **Extended** keeps your screen private, but the projected screen is **behind you**.
+  You turn around to see it, or run an OBS projector window just to know what you are
+  showing.
+
+This extension completes **extended mode**. The extended screen is what you project,
+and it is mirrored live on **workspace 1** of your own screen. It feels as if GNOME
+projected workspace 1 only, and workspaces 2, 3… are yours alone.
 
 ![Workspace 1 mirroring the secondary screen](docs/images/mirror.png)
+
+**Designed to be seamless.** You should not have to think about having two screens:
+
+- **Smart pointer.** Swipe to workspace 1 and the pointer is on the projected screen, at
+  the spot you see it. Swipe away and it comes back with you. Push the top edge to reach
+  your top bar.
+- **Smart windows.** Open a window on workspace 1 and the room sees it. Alt+Tab there
+  lists what is projected. Leave workspace 1 and your keyboard leaves projected windows,
+  so what you type next stays private.
+
+The room keeps seeing the projected screen while you work on a private workspace: your
+slides stay up while you read your notes.
 
 ## What it does
 
 - 📽️ **One button in Quick Settings**, next to Wi-Fi and Do Not Disturb, with the
   preferences one click away. While presenting, the top bar shows a red **Mirror** on
   workspace 1 and a green **Private** on the others, at the right of the bar or in the
-  center, just left of the clock; otherwise the extension adds nothing there. Private is about the workspace you are on: the room still sees the
-  secondary screen. The mode is off at every login and turns on in one click.
+  center, just left of the clock; otherwise the extension adds nothing there. Private
+  is about the workspace you are on: the room still sees the secondary screen. The mode
+  is off at every login and turns on in one click.
 - 🪞 **Workspace 1 is the room's view.** A live copy of the secondary screen, scaled
   to fit with black bands, drawn under your top bar. Leave workspace 1 and it is
   gone; come back and it is there. It is a compositor clone, not a video capture:
   no lag, no encoding, near-zero cost.
 - 🔴 **You see the pointer.** A dot marks where the pointer is on the secondary
   screen — on a scaled-down copy, a real arrow would be lost.
+- 👆 **Swipe from anywhere.** The trackpad gesture switches workspaces even with the
+  pointer on the secondary screen, the copy slides with workspace 1, and the pointer and
+  keyboard come back with you.
 - 🔭 **The overview shows it too.** In the overview, workspace 1 lists the projected
-  windows instead of looking empty; click one to go back to it.
+  windows instead of looking empty, and the pointer stays where you can see it; click a
+  window to go back to it.
 - 🧹 **Workspace 1 holds nothing else.** Turn the mode on with windows already there:
   an empty workspace is inserted in front of them and becomes workspace 1. Your
   windows slide one workspace to the right, untouched.
@@ -75,8 +96,11 @@ apply right away, even with the mode on.
 | Indicator position              | Right     |
 | Share window shortcut           | `Super+E` |
 
-With both smart options off, the mode is the live copy on workspace 1, plus the shortcut
-and Do Not Disturb.
+With both smart options off, the mode is the live copy on workspace 1 and its top bar
+indicator, plus the shortcut and Do Not Disturb.
+
+**Indicator position** — *Right* keeps Mirror/Private with the system icons; *Center*
+puts it just left of the clock.
 
 **Smart pointer** — moving from one screen to the other means dragging the pointer
 across the edge. With this on:

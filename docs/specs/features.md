@@ -1,7 +1,10 @@
 # presentation-workspace — Spec MVP
 
-Extension GNOME Shell pour **présenter sur un écran secondaire en mode étendu** tout
-en gardant sur l'écran principal un **retour** de ce que voit la salle — sans OBS.
+Extension GNOME Shell pour **celles et ceux qui projettent leur écran**, en présentation
+ou dans l'enseignement. Elle complète le **mode étendu** de GNOME : l'écran étendu est
+l'écran projeté, et il est répliqué sur le **bureau 1** de l'écran principal. On a ainsi
+l'impression que GNOME ne projette que le bureau 1, les autres restant **privés**. Une
+gestion intelligente du curseur et des fenêtres rend l'usage aussi fluide que possible.
 
 - **Statut** : draft
 - **Date** : 2026-11-09
@@ -461,7 +464,9 @@ Main.layoutManager.uiGroup
 
 ### 5.2 Visibilité
 
-`mirror.visible = allumé && bureau actif == 0 && !Main.overview.visible`
+`mirror.visible = allumé && bureau actif == 0 && !Main.overview.visible && !glissement`
+
+Pendant une animation de changement de bureau, c'est la copie qui glisse (§4.2).
 
 Signaux : `global.workspace_manager` `active-workspace-changed`, `Main.overview`
 `showing`/`hidden`, `Main.layoutManager` `monitors-changed` (recalcul de la
@@ -548,7 +553,8 @@ extensions pour les réglages rapides. Il porte :
 | `src/extension.js`          | `enable()` / `disable()`, raccourci              |
 | `src/mode.js`               | état du mode, visibilité, DND, bureau 1, curseur |
 | `src/mirror.js`             | le retour : clone, géométrie, pastille           |
-| `src/indicator.js`          | réglages rapides et icône de la topbar           |
+| `src/indicator.js`          | réglages rapides et indicateur de la topbar      |
+| `src/prefs.js`              | fenêtre de préférences (§4.1, §6)                |
 | `src/topedge.js`            | bord haut ↔ topbar (§4.9)                        |
 | `src/geometry.js`           | calculs purs, sans `gi://`, testés sous node     |
 | `src/schemas/*.gschema.xml` | les clés du §6                                   |
