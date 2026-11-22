@@ -28,9 +28,10 @@ of the projected one, workspaces 2, 3… stay private.
 ## What it does
 
 - 📽️ **One button in Quick Settings**, next to Wi-Fi and Do Not Disturb, with the
-  preferences one click away. While presenting, a red icon shows in the top bar;
-  otherwise the extension adds nothing there. The mode is off at every login and
-  turns on in one click.
+  preferences one click away. While presenting, the top bar shows a red **Mirror** on
+  workspace 1 and a green **Private** on the others; otherwise the extension adds
+  nothing there. Private is about the workspace you are on: the room still sees the
+  secondary screen. The mode is off at every login and turns on in one click.
 - 🪞 **Workspace 1 is the room's view.** A live copy of the secondary screen, scaled
   to fit with black bands, drawn under your top bar. Leave workspace 1 and it is
   gone; come back and it is there. It is a compositor clone, not a video capture:
@@ -68,7 +69,7 @@ even with the mode on.
 
 | Group         | Option                                    | Default   |
 | ------------- | ----------------------------------------- | --------- |
-| Pointer       | Pointer follows workspace 1               | off       |
+| Pointer       | Pointer and keyboard follow workspace 1   | off       |
 | Pointer       | Push the top edge to reach the top bar    | on        |
 | Windows       | Workspace 1 opens on the secondary screen | off       |
 | Windows       | Share window shortcut                     | on        |
@@ -79,12 +80,16 @@ even with the mode on.
 The options switch a behavior on or off; they do not tune it — the shortcut's key is
 the one exception.
 
-**Pointer follows workspace 1** — moving from one screen to the other means dragging
-the pointer across the edge. With this on, arriving on workspace 1 (trackpad gesture,
-scroll on the top bar, shortcut) puts the pointer in the middle of the secondary
-screen, and leaving workspace 1 brings it back to the middle of the primary one — only
-if it was still on the secondary screen. Switching between private workspaces never
-moves it.
+**Pointer and keyboard follow workspace 1** — moving from one screen to the other means
+dragging the pointer across the edge. With this on, arriving on workspace 1 (trackpad
+gesture, scroll on the top bar, shortcut) puts the pointer on the secondary screen, at
+the spot it was over in the copy. Leaving workspace 1 brings it back to that spot on the
+primary screen — only if it was still on the secondary one. Leaving also takes the
+keyboard off a projected window, so what you type next stays private. Switching between
+private workspaces never moves them.
+
+The trackpad gesture switches workspaces from the secondary screen too while the mode is
+on, whatever this option says.
 
 **Workspace 1 opens on the secondary screen** — workspace 1 *shows* the public screen,
 so launching an app from there means you want to show it. With this on, the window

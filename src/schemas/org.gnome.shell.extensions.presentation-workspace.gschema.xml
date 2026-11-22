@@ -3,8 +3,8 @@
   <schema id="org.gnome.shell.extensions.presentation-workspace" path="/org/gnome/shell/extensions/presentation-workspace/">
     <key name="warp-pointer" type="b">
       <default>false</default>
-      <summary>Move the pointer with workspace 1</summary>
-      <description>Arriving on workspace 1 puts the pointer at the center of the secondary screen; leaving it with the pointer still there brings it back to the center of the primary screen.</description>
+      <summary>Move the pointer and keyboard with workspace 1</summary>
+      <description>Arriving on workspace 1 puts the pointer on the secondary screen, at the spot it was over in the mirror; leaving it with the pointer still there brings it back to that spot on the primary screen, and keyboard focus leaves the secondary screen.</description>
     </key>
     <key name="auto-share" type="b">
       <default>false</default>

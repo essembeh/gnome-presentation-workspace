@@ -124,9 +124,16 @@ corrige pas.
           └──────────────────────────────────────┘
   ```
 
-- **Une icône rouge dans la topbar, seulement mode allumé** (parmi les icônes
-  système, comme celle d'enregistrement d'écran) : « ce que tu montres est vu ».
-  Mode éteint, l'extension n'ajoute **rien** à la topbar.
+- **Un indicateur dans la topbar, seulement mode allumé** (parmi les icônes système,
+  comme celle d'enregistrement d'écran), une icône suivie d'un mot. Il répond à « la
+  salle voit-elle le bureau que je regarde ? » :
+  - bureau 1 : écran et `Mirror` en **rouge**, ce bureau est ce que voit la salle ;
+  - autre bureau : cadenas et `Private` en **vert**, ce bureau n'est pas répliqué.
+
+  `Private` ne parle que du bureau courant : la salle voit toujours l'écran secondaire
+  et les fenêtres qui s'y trouvent. L'icône et le mot changent avec la couleur, pour
+  rester lisibles sans distinguer le rouge du vert. Mode éteint, l'extension n'ajoute
+  **rien** à la topbar.
 - Historique : un bouton dédié dans la topbar, toujours visible, portait d'abord le
   menu. Les réglages rapides sont l'endroit standard d'un interrupteur de ce genre,
   et une icône permanente pour un mode qu'on utilise en formation seulement
@@ -140,7 +147,7 @@ corrige pas.
 
   | Groupe        | Options                                                   |
   | ------------- | --------------------------------------------------------- |
-  | Pointer       | le curseur suit le bureau 1 (§4.6), bord haut (§4.9)      |
+  | Pointer       | curseur et clavier (§4.6), bord haut (§4.9)               |
   | Windows       | bureau 1 → écran secondaire (§4.7), raccourci (§4.4)      |
   | Alt+Tab       | Alt+Tab suit le bureau 1 (§4.8)                           |
   | Notifications | Ne pas déranger (§4.5)                                    |
@@ -159,8 +166,8 @@ corrige pas.
 
 Allumer le mode déclenche le retour sur le bureau 1 (§4.2), et, **chacun selon son
 réglage (§6)** : le curseur dans le retour (§4.3), la coupure des bannières de
-notification (§4.5), le curseur qui suit le bureau 1 (§4.6) et l'envoi sur l'écran
-secondaire des fenêtres ouvertes sur le bureau 1 (§4.7).
+notification (§4.5), le curseur et le clavier qui suivent le bureau 1 (§4.6) et
+l'envoi sur l'écran secondaire des fenêtres ouvertes sur le bureau 1 (§4.7).
 
 ### 4.2 Le retour sur le bureau 1
 
@@ -204,6 +211,13 @@ secondaire des fenêtres ouvertes sur le bureau 1 (§4.7).
 - **Le bureau 1 est maintenu en vie** tant que le mode est allumé : avec les
   bureaux dynamiques, GNOME supprime un bureau vide qui n'est pas le dernier, ce qui
   décalerait toute la numérotation (§5.3).
+- **Il glisse avec le bureau 1** quand on change de bureau. GNOME dessine son animation
+  juste au-dessus des fenêtres, donc sous le retour, qui la cacherait. Pendant
+  l'animation, le retour est masqué et une copie vivante est posée dans le groupe du
+  bureau 1 de GNOME ; elle disparaît avec lui à la fin. **Effet purement visuel, il ne
+  doit jamais casser le changement de bureau** : si une méthode interne manque, le
+  glissement n'est pas activé ; si la copie échoue, l'erreur va au journal, le retour
+  reste affiché et l'animation de GNOME se termine normalement (passage sec).
 
 ### 4.3 Le curseur dans le retour
 
@@ -251,7 +265,7 @@ secondaire des fenêtres ouvertes sur le bureau 1 (§4.7).
   à `false`. L'extension mémorise donc dans son propre schéma qu'elle a coupé les
   bannières (`banners-muted`), et le `enable()` suivant les restaure.
 
-### 4.6 Le curseur suit le bureau 1
+### 4.6 Le curseur et le clavier suivent le bureau 1
 
 Sans extension, passer d'un écran à l'autre oblige à faire glisser le pointeur
 jusqu'au bord. Le bureau 1 étant « l'écran secondaire », le pointeur suit les
@@ -259,19 +273,42 @@ changements de bureau, mode allumé :
 
 | Transition                        | Pointeur avant   | Effet                            |
 | --------------------------------- | ---------------- | -------------------------------- |
-| autre bureau → bureau 1           | écran principal  | **centre de l'écran secondaire** |
+| autre bureau → bureau 1           | écran principal  | **point du secondaire montré**   |
 | autre bureau → bureau 1           | écran secondaire | rien (on garde sa position)      |
-| bureau 1 → autre bureau           | écran secondaire | **centre de l'écran principal**  |
+| bureau 1 → autre bureau           | écran secondaire | **sa place dans le retour**      |
 | bureau 1 → autre bureau           | écran principal  | rien (ex. scroll sur le panel)   |
 | bureau privé → autre bureau privé | peu importe      | rien                             |
-| allumage du mode sur le bureau 1  | écran principal  | centre de l'écran secondaire     |
+| allumage du mode sur le bureau 1  | écran principal  | point du secondaire montré       |
+| vue d'ensemble ouverte, bureau 1  | écran secondaire | **sa place dans le retour**      |
 
+- **Le curseur garde sa place à l'écran** : le saut suit la correspondance entre
+  l'écran secondaire et le retour. Depuis une bande noire, il va au bord le plus proche
+  de l'écran secondaire. Le saut passe par la mi-hauteur des écrans, loin des barrières
+  (§4.9).
 - Indépendant du moyen de changer de bureau : geste trackpad, scroll sur le panel,
   raccourci clavier, vue d'ensemble.
+- **Dans la vue d'ensemble, le curseur reste sur l'écran principal** : le retour y est
+  masqué, sur l'écran secondaire il serait invisible. Ouverte depuis le bureau 1 avec
+  le curseur sur l'écran secondaire, la vue le ramène sur l'écran principal. Aucun saut
+  ensuite tant qu'elle est ouverte : il se fait **à la fermeture**. Fermée sur le
+  bureau 1, elle compte comme une arrivée : le curseur passe sur l'écran secondaire et
+  la pastille le montre dans le retour.
 - `Clutter.Seat.warp_pointer` (API publique, utilisée par la loupe).
 - Pas de confinement : sur le bureau 1, le pointeur peut toujours revenir sur
   l'écran principal par le bord (pour atteindre le panel) ; il atterrit alors sur
   le retour, qui ne réagit pas aux clics.
+- **Le clavier suit aussi, en quittant le bureau 1** (même réglage) : si le focus est
+  resté sur une fenêtre de l'écran secondaire, il passe à la dernière fenêtre utilisée
+  du nouveau bureau sur l'écran principal. S'il n'y en a aucune, plus aucune fenêtre
+  n'a le focus : une frappe ne doit pas partir dans la fenêtre projetée. Décidé après
+  le changement de bureau, pour ne pas écraser une fenêtre activée explicitement. Rien
+  dans la vue d'ensemble, où le clic choisit la fenêtre.
+
+**Le geste de changement de bureau marche depuis l'écran secondaire**, mode allumé,
+sans réglage. GNOME ignore un geste qui démarre hors de l'écran principal quand les
+bureaux n'existent que sur celui-ci, ce qui bloquerait le geste sur le bureau 1. Le
+geste y est traité comme s'il démarrait sur l'écran principal
+(`SwipeTracker._beginGesture`, limité au tracker des bureaux).
 
 ### 4.7 Le bureau 1 ouvre sur l'écran secondaire
 
@@ -474,8 +511,9 @@ Un `QuickSettings.SystemIndicator` ajouté par
 `Main.panel.statusArea.quickSettings.addExternalIndicator()` — l'API publique des
 extensions pour les réglages rapides. Il porte :
 
-- l'icône de la topbar (`_addIndicator()`), visible seulement mode allumé, rouge
-  `#e01b24` (classe `presentation-indicator`) ;
+- l'icône de la topbar (`_addIndicator()`) et son libellé, visibles seulement mode
+  allumé : rouge `#e01b24` sur le bureau 1, vert `#33d17a` ailleurs (classes
+  `presentation-indicator` et `presentation-mirrored`) ;
 - un `QuickMenuToggle` dans `quickSettingsItems` : `checked` suit le mode,
   `reactive` à `false` et sous-titre « No secondary screen » sans écran secondaire ;
   son menu a un en-tête (`setHeader`) et l'entrée Preferences
@@ -497,6 +535,9 @@ extensions pour les réglages rapides. Il porte :
 | Alt+Tab sur le bureau 1  | GSettings, relue à chaque Alt+Tab      | faible                |
 | Alt+Tab vers le bureau 1 | `AppSwitcherPopup._finish`, interne    | moyen                 |
 | Bureau 1 en vue d'ens.   | `Workspace._isMyWindow`, interne       | moyen                 |
+| Geste sur écran second.  | `SwipeTracker._beginGesture`, interne  | moyen                 |
+| Clavier vers principal   | `get_tab_list`, `activate`, publiques  | faible                |
+| Glissement du retour     | `_prepareWorkspaceSwitch`, interne     | moyen                 |
 | Bord haut → topbar       | `Layout.PressureBarrier`, exportée     | moyen                 |
 | Coin actif coupé         | `layoutManager.hotCorners`, interne    | moyen                 |
 
@@ -522,7 +563,7 @@ pouvoir le couper sans toucher au reste.
 
 | Clé                  | Type | Défaut                | Comportement (§)                    | Préférences |
 | -------------------- | ---- | --------------------- | ----------------------------------- | ----------- |
-| `warp-pointer`       | bool | `false`               | le curseur suit le bureau 1 (§4.6)  | oui         |
+| `warp-pointer`       | bool | `false`               | curseur et clavier suivent (§4.6)   | oui         |
 | `auto-share`         | bool | `false`               | bureau 1 → écran secondaire (§4.7)  | oui         |
 | `share-shortcut`     | bool | `true`                | raccourci partager/reprendre (§4.4) | oui         |
 | `share-window`       | as   | `['<Super>e']`        | la combinaison du raccourci         | oui         |

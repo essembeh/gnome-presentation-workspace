@@ -12,10 +12,11 @@ const GROUPS = [
     {
         title: 'Pointer',
         options: [
-            ['warp-pointer', 'Pointer follows workspace 1',
-                'Arriving on workspace 1 puts the pointer in the middle of the secondary ' +
-                'screen; leaving it brings the pointer back to the primary screen, only if ' +
-                'it was still on the secondary one.'],
+            ['warp-pointer', 'Pointer and keyboard follow workspace 1',
+                'Arriving on workspace 1 puts the pointer on the secondary screen, at the ' +
+                'spot it was over in the mirror. Leaving it brings the pointer back to ' +
+                'that spot on the primary screen, and takes the keyboard off projected ' +
+                'windows.'],
             ['top-edge', 'Push the top edge to reach the top bar',
                 'On workspace 1, push the pointer against the top of the secondary screen: ' +
                 'it lands on the top bar, right above its place in the mirror. Going back ' +

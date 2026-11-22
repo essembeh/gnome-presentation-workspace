@@ -5,10 +5,14 @@ import Meta from 'gi://Meta';
 import {InjectionManager} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as AltTab from 'resource:///org/gnome/shell/ui/altTab.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as SwipeTracker from 'resource:///org/gnome/shell/ui/swipeTracker.js';
+import * as WorkspaceAnimation from 'resource:///org/gnome/shell/ui/workspaceAnimation.js';
 import * as WorkspaceUI from 'resource:///org/gnome/shell/ui/workspace.js';
 import * as Signals from 'resource:///org/gnome/shell/misc/signals.js';
 
-import {center, contains, pointerTarget} from './geometry.js';
+import {
+    center, contains, mirrorView, pointerTarget, toMirrorPoint, toSecondaryPoint,
+} from './geometry.js';
 import {Mirror} from './mirror.js';
 import {TopEdge} from './topedge.js';
 
@@ -76,6 +80,8 @@ export class PresentationMode extends Signals.EventEmitter {
         this._injections = new InjectionManager();
         this._switcherPatched = false;
         this._overviewInjections = new InjectionManager();
+        this._gestureInjections = new InjectionManager();
+        this._sliding = false;
         this._cursorTracker = global.backend.get_cursor_tracker();
         this._seat = global.stage.get_context().get_backend().get_default_seat();
 
@@ -117,8 +123,9 @@ export class PresentationMode extends Signals.EventEmitter {
             'showing', () => {
                 this._updateVisibility();
                 this._topEdge?.reset();
+                this._pullPointerToOverview();
             },
-            'hidden', () => this._updateVisibility(), this);
+            'hidden', () => this._onOverviewHidden(), this);
 
         this._keepWorkspaceAlive();
         this._keepAliveSourceId = GLib.timeout_add_seconds(
@@ -129,6 +136,7 @@ export class PresentationMode extends Signals.EventEmitter {
 
         this._trackCursor();
         this._patchOverview();
+        this._patchGesture();
         this._updateVisibility();
         // Turning the mode on while on workspace 1 counts as arriving on it.
         this._workspaceIndex = -1;
@@ -177,6 +185,8 @@ export class PresentationMode extends Signals.EventEmitter {
 
         this._unpatchSwitcher();
         this._overviewInjections.clear();
+        this._gestureInjections.clear();
+        this._sliding = false;
         restoreOverrides(this._settings);
         this.emit('changed');
     }
@@ -223,6 +233,24 @@ export class PresentationMode extends Signals.EventEmitter {
         this._updateVisibility();
         this._warpPointer();
         this._syncSwitcher();
+    }
+
+    /** The overview only shows on the primary screen: a pointer left on the other is lost. */
+    _pullPointerToOverview() {
+        const [x, y] = global.get_pointer();
+        if (this._settings.get_boolean('warp-pointer') &&
+            global.workspace_manager.get_active_workspace_index() === 0 &&
+            contains(secondaryMonitor(), x, y))
+            this._jumpPointer(false, x, y);
+    }
+
+    /** The pointer jump held back during the overview; closing it on workspace 1 is an arrival. */
+    _onOverviewHidden() {
+        this._updateVisibility();
+        if (global.workspace_manager.get_active_workspace_index() === 0)
+            this._workspaceIndex = -1;
+        // The click that closed the overview already chose the focused window.
+        this._warpPointer(false);
     }
 
     /**
@@ -280,6 +308,79 @@ export class PresentationMode extends Signals.EventEmitter {
             window.get_monitor() === secondaryMonitor()?.index;
     }
 
+    /**
+     * GNOME drops a workspace swipe started off the primary screen when workspaces only
+     * exist there: it counts as started on the primary screen (spec §4.6).
+     */
+    _patchGesture() {
+        this._gestureInjections.overrideMethod(SwipeTracker.SwipeTracker.prototype, '_beginGesture',
+            original => function (x, y) {
+                if (this === Main.wm._workspaceAnimation?._swipeTracker &&
+                    contains(secondaryMonitor(), x, y)) {
+                    const point = center(Main.layoutManager.primaryMonitor);
+                    original.call(this, point.x, point.y);
+                    return;
+                }
+                original.call(this, x, y);
+            });
+
+        const mode = this;
+        const controller = WorkspaceAnimation.WorkspaceAnimationController.prototype;
+        // Both or neither: without the end of the animation, the mirror would stay hidden.
+        if (typeof controller._prepareWorkspaceSwitch !== 'function' ||
+            typeof controller._finishWorkspaceSwitch !== 'function') {
+            console.warn('presentation-workspace: workspace animation changed, mirror slide off');
+            return;
+        }
+        this._gestureInjections.overrideMethod(controller, '_prepareWorkspaceSwitch',
+            original => function (...args) {
+                original.apply(this, args);
+                mode._startSlide(this._switchData);
+            });
+        this._gestureInjections.overrideMethod(controller, '_finishWorkspaceSwitch',
+            original => function (...args) {
+                try {
+                    original.apply(this, args);
+                } finally {
+                    mode._endSlide();
+                }
+            });
+    }
+
+    /** GNOME's animation runs under the mirror: a copy slides inside workspace 1's group. */
+    _startSlide(switchData) {
+        // GNOME holds the input grab here: an exception would leave the session stuck.
+        let copy = null;
+        try {
+            const {primaryIndex, primaryMonitor} = Main.layoutManager;
+            const group = switchData.monitors.find(monitor => monitor.index === primaryIndex)
+                ?._workspaceGroups.find(candidate => candidate.workspace.index() === 0);
+            if (!group)
+                return;
+            const {x, y, width, height} = Main.layoutManager.getWorkAreaForMonitor(primaryIndex);
+            copy = new Mirror();
+            copy.setGeometry({x: x - primaryMonitor.x, y: y - primaryMonitor.y, width, height},
+                secondaryMonitor());
+            const [pointerX, pointerY] = global.get_pointer();
+            copy.setPointer(pointerX, pointerY);
+            copy.visible = true;
+            group.add_child(copy);
+            this._sliding = true;
+            this._updateVisibility();
+        } catch (error) {
+            console.error('presentation-workspace: mirror slide failed', error);
+            copy?.destroy();
+            this._sliding = false;
+            this._updateVisibility();
+        }
+    }
+
+    _endSlide() {
+        this._sliding = false;
+        if (this._active)
+            this._updateVisibility();
+    }
+
     /** A window of the secondary screen picked with Alt+Tab from a private workspace. */
     _followToMirror(window, timestamp) {
         const manager = global.workspace_manager;
@@ -300,20 +401,63 @@ export class PresentationMode extends Signals.EventEmitter {
     }
 
     /** Workspace 1 is the secondary screen: the pointer follows workspace switches in and out of it. */
-    _warpPointer() {
+    _warpPointer(moveFocus = true) {
+        // No mirror in the overview to show the pointer: wait for it to close.
+        if (Main.overview.visible)
+            return;
         const previous = this._workspaceIndex;
         this._workspaceIndex = global.workspace_manager.get_active_workspace_index();
         if (!this._settings.get_boolean('warp-pointer'))
             return;
+        if (moveFocus && previous === 0 && this._workspaceIndex !== 0)
+            this._queueFocusPrimary();
 
         const secondary = secondaryMonitor();
         const [x, y] = global.get_pointer();
         const target = pointerTarget(previous, this._workspaceIndex, contains(secondary, x, y));
         if (target === null)
             return;
-        const {monitors, primaryIndex} = Main.layoutManager;
-        const point = center(target === 'secondary' ? secondary : monitors[primaryIndex]);
+        this._jumpPointer(target === 'secondary', x, y);
+    }
+
+    /** Moves the pointer between a point of the secondary screen and its place in the mirror. */
+    _jumpPointer(toSecondary, x, y) {
+        const secondary = secondaryMonitor();
+        const {primaryIndex, primaryMonitor} = Main.layoutManager;
+        const view = mirrorView(Main.layoutManager.getWorkAreaForMonitor(primaryIndex), secondary);
+        const point = (toSecondary ? toSecondaryPoint : toMirrorPoint)(view, secondary, x, y);
+        // A warp is a motion: through mid-height, it stays clear of barriers and hot corners.
+        const [from, to] = toSecondary ? [primaryMonitor, secondary] : [secondary, primaryMonitor];
+        this._seat.warp_pointer(x, center(from).y);
+        this._seat.warp_pointer(point.x, center(to).y);
         this._seat.warp_pointer(point.x, point.y);
+    }
+
+    /** Decided after the switch: a window activated along with it keeps the focus. */
+    _queueFocusPrimary() {
+        const id = global.compositor.get_laters().add(Meta.LaterType.BEFORE_REDRAW, () => {
+            this._laterIds.delete(id);
+            this._focusPrimary();
+            return GLib.SOURCE_REMOVE;
+        });
+        this._laterIds.add(id);
+    }
+
+    /** Takes the keyboard off a projected window: typing must not reach the room. */
+    _focusPrimary() {
+        const manager = global.workspace_manager;
+        const focused = global.display.focus_window;
+        if (!this._active || Main.overview.visible || manager.get_active_workspace_index() === 0 ||
+            focused?.get_monitor() !== secondaryMonitor()?.index)
+            return;
+        const {primaryIndex} = Main.layoutManager;
+        const window = global.display.get_tab_list(Meta.TabList.NORMAL, manager.get_active_workspace())
+            .find(candidate => candidate.get_monitor() === primaryIndex && !candidate.minimized);
+        const time = global.get_current_time();
+        if (window)
+            window.activate(time);
+        else
+            global.display.unset_input_focus(time);
     }
 
     _updateGeometry() {
@@ -323,7 +467,7 @@ export class PresentationMode extends Signals.EventEmitter {
 
     _updateVisibility() {
         this._mirror.visible = global.workspace_manager.get_active_workspace_index() === 0 &&
-            !Main.overview.visible;
+            !Main.overview.visible && !this._sliding;
         this._topEdge?.sync();
     }
 

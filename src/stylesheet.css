@@ -8,6 +8,17 @@
     background-color: -st-accent-color;
 }
 
+.presentation-indicator,
 .system-status-icon.presentation-indicator {
+    color: #33d17a;
+}
+
+.presentation-indicator.presentation-mirrored,
+.system-status-icon.presentation-indicator.presentation-mirrored {
     color: #e01b24;
+}
+
+.presentation-indicator-label {
+    padding-left: 4px;
+    font-weight: bold;
 }

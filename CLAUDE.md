@@ -4,7 +4,8 @@
 secondary screen in extended (joined) mode**: workspace 1 of the primary screen shows
 a live mirror of the secondary screen, the other workspaces stay private. It replaces
 an OBS projector window. A Quick Settings button turns the mode on and off and
-opens the preferences; a red top bar icon shows only while the mode is on.
+opens the preferences; while the mode is on, the top bar shows a red "Mirror" on
+workspace 1 and a green "Private" on the others.
 
 GNOME **50** (NixOS stable), pure GJS/ESM, **no build step**. Shipped code lives in
 `src/`, dev helpers in `tests/`.
@@ -73,6 +74,72 @@ propose a compromise. Seb explicitly wants push-back, not compliance.
 - **No nested shell**: tried and removed, the devkit cannot show two monitors. Testing
   happens in Seb's real session with a real second screen (`just install`, then a
   session restart). Never ask him to restart his session without a reason.
+
+## New GNOME version: revalidation
+
+Run this whole process **each time NixOS offers a new GNOME version**, before declaring
+it in `shell-version`. GNOME refuses to load the extension on an undeclared version, so
+add it on a branch to test, and release only once every point below passes.
+
+**1. Diff the private members.** Extract the new sources and check that each one below
+still exists and still works the same way; the old version's sources give the diff.
+
+```bash
+d=$(nix-store -qR "$(readlink -f "$(command -v gnome-shell)")" |
+    grep -E -- '-gnome-shell-[0-9.]+$' | head -1)
+gresource extract "$(ls "$d"/lib/gnome-shell/libshell-*.so | head -1)" \
+    /org/gnome/shell/ui/workspaceAnimation.js
+```
+
+- `workspaceAnimation.js`: `_prepareWorkspaceSwitch`, `_finishWorkspaceSwitch`,
+  `_switchData`, `MonitorGroup._workspaceGroups`, `_swipeTracker`, and the animation
+  still inserted right above `global.window_group`.
+- `windowManager.js`: `Main.wm._workspaceAnimation`, `keepWorkspaceAlive`,
+  `insertWorkspace`.
+- `swipeTracker.js`: `_beginGesture`, still called through `this`.
+- `altTab.js`: `AppSwitcherPopup._finish`, `_items`, `_selectedIndex`, `_currentWindow`,
+  `cachedWindows`.
+- `workspace.js`: `Workspace._isMyWindow`, `metaWorkspace`, `monitorIndex`.
+- `layout.js`: `PressureBarrier`, `hotCorners`, `setBarrierSize`, `panelBox`.
+- `quickSettings.js`: `SystemIndicator`, `QuickMenuToggle`, `_addIndicator`,
+  `addExternalIndicator`.
+
+**2. Run `just check`, then `just install`**, and ask Seb to log out and back in.
+
+**3. Seb tests in his real session, with a real second screen:**
+
+- **Mode:** the Quick Settings button is greyed out without a second screen. The top
+  bar shows a red "Mirror" on workspace 1, a green "Private" elsewhere, nothing with the
+  mode off. Unplugging the screen turns the mode off.
+- **Mirror:** live, ratio kept with black bands, blue dot on the pointer, top bar and
+  menus above it, clicks ignored. Workspace 1 survives while empty. Windows already on
+  it move to workspace 2 when the mode turns on.
+- **Windows:** the share shortcut sends a window and brings it back to its workspace.
+  A window opened on workspace 1 goes to the secondary screen.
+- **Top edge:** a push along the whole width reaches the top bar at the matching spot,
+  without opening the overview. Going down returns to the secondary screen, also after
+  closing a top bar menu.
+- **Alt+Tab:** workspace 1 lists only projected windows. Picking one from a private
+  workspace goes back to workspace 1.
+- **Overview:** workspace 1's preview shows the projected windows. Opened from the
+  secondary screen, it brings the pointer to the primary one. The pointer stays there
+  until the overview closes, then shows as the dot on workspace 1.
+- **Gesture:** it works with the pointer on the secondary screen, and the mirror slides
+  both ways. A cancelled swipe restores the mirror. **Nothing freezes: input always
+  comes back.**
+- **Pointer and keyboard:** after a swipe the pointer keeps its place, also near each
+  corner, without opening the overview. Typing lands in the new workspace's window, and
+  never in a projected window when that workspace is empty.
+- **Restoration:** turning the mode off restores Do Not Disturb and Alt+Tab settings.
+  Every preference switches its behavior off right away.
+
+**4. Read the log** after these tests. Any line here is a regression to fix, including
+the "mirror slide" ones: the fallback keeps the session usable but hides a broken hook.
+The filter drops the harmless notice that the dev copy shadows the NixOS one.
+
+```bash
+journalctl --user -b | grep -i presentation-workspace | grep -v 'already installed'
+```
 
 ## Git
 

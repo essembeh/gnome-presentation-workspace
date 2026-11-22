@@ -75,6 +75,26 @@ export function toSecondaryX(view, secondary, x) {
     return Math.min(Math.max(column, secondary.x), secondary.x + secondary.width - 1);
 }
 
+/** Where a point of the secondary screen appears in the mirror. */
+export function toMirrorPoint(view, secondary, x, y) {
+    return {
+        x: toMirrorX(view, secondary, x),
+        y: Math.round(view.y + (y - secondary.y) * view.scale),
+    };
+}
+
+/**
+ * The secondary screen point under a mirror point, black bands mapped to its edges.
+ * Never on the top row: the top edge barrier would count the jump as a push.
+ */
+export function toSecondaryPoint(view, secondary, x, y) {
+    const row = Math.round(secondary.y + (y - view.y) / view.scale);
+    return {
+        x: toSecondaryX(view, secondary, x),
+        y: Math.min(Math.max(row, secondary.y + 1), secondary.y + secondary.height - 1),
+    };
+}
+
 /**
  * Parts of the secondary screen's top edge with no monitor above, as [x1, x2] pairs:
  * a barrier there must not block the way to a screen stacked on top.

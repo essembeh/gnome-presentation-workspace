@@ -4,9 +4,24 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 
 import {
-    center, contains, letterbox, mirrorView, pointerTarget, returnWorkspace, toMirrorX,
-    toSecondaryX, topEdge,
+    center, contains, letterbox, mirrorView, pointerTarget, returnWorkspace, toMirrorPoint,
+    toMirrorX, toSecondaryPoint, toSecondaryX, topEdge,
 } from '../src/geometry.js';
+
+test('toMirrorPoint / toSecondaryPoint: the pointer keeps its place in the mirror', () => {
+    const secondary = {x: 0, y: 0, width: 1920, height: 1200};
+    const view = mirrorView({x: 1920, y: 40, width: 3440, height: 1400}, secondary);
+    const shown = toMirrorPoint(view, secondary, 960, 600);
+    assert.deepEqual(shown, {x: view.x + 1120, y: view.y + 700});
+    assert.deepEqual(toSecondaryPoint(view, secondary, shown.x, shown.y), {x: 960, y: 600});
+});
+
+test('toSecondaryPoint: black bands map to the edges, never onto the top row', () => {
+    const secondary = {x: 0, y: 0, width: 1920, height: 1200};
+    const view = mirrorView({x: 1920, y: 40, width: 3440, height: 1400}, secondary);
+    assert.deepEqual(toSecondaryPoint(view, secondary, 1920, 0), {x: 0, y: 1});
+    assert.deepEqual(toSecondaryPoint(view, secondary, 5359, 1439), {x: 1919, y: 1199});
+});
 
 test('contains / center', () => {
     const ext = {x: 1920, y: 0, width: 1920, height: 1080};
