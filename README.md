@@ -29,8 +29,8 @@ of the projected one, workspaces 2, 3… stay private.
 
 - 📽️ **One button in Quick Settings**, next to Wi-Fi and Do Not Disturb, with the
   preferences one click away. While presenting, the top bar shows a red **Mirror** on
-  workspace 1 and a green **Private** on the others; otherwise the extension adds
-  nothing there. Private is about the workspace you are on: the room still sees the
+  workspace 1 and a green **Private** on the others, at the right of the bar or in the
+  center, just left of the clock; otherwise the extension adds nothing there. Private is about the workspace you are on: the room still sees the
   secondary screen. The mode is off at every login and turns on in one click.
 - 🪞 **Workspace 1 is the room's view.** A live copy of the secondary screen, scaled
   to fit with black bands, drawn under your top bar. Leave workspace 1 and it is
@@ -62,64 +62,54 @@ The **Presentation** button sits in GNOME's Quick Settings menu, top right. Clic
 turn the mode on or off (greyed out without a secondary screen); its arrow opens a
 menu with **Preferences**. The preferences window also opens from GNOME's Extensions
 app, like any extension's.
-Options are grouped by theme, each with a line explaining it, and apply right away,
-even with the mode on.
+Two switches group the smart behaviors, so either can go back to plain GNOME. Options
+apply right away, even with the mode on.
 
 <p align="center"><img src="docs/images/preferences.png" alt="The preferences window" width="480"></p>
 
-| Group         | Option                                    | Default   |
-| ------------- | ----------------------------------------- | --------- |
-| Pointer       | Pointer and keyboard follow workspace 1   | off       |
-| Pointer       | Push the top edge to reach the top bar    | on        |
-| Windows       | Workspace 1 opens on the secondary screen | off       |
-| Windows       | Share window shortcut                     | on        |
-| Windows       | Shortcut                                  | `Super+E` |
-| Alt+Tab       | Alt+Tab follows workspace 1               | on        |
-| Notifications | Do Not Disturb while presenting           | on        |
+| Option                          | Default   |
+| ------------------------------- | --------- |
+| Smart pointer                   | on        |
+| Smart windows                   | on        |
+| Do Not Disturb while presenting | on        |
+| Indicator position              | Right     |
+| Share window shortcut           | `Super+E` |
 
-The options switch a behavior on or off; they do not tune it — the shortcut's key is
-the one exception.
+With both smart options off, the mode is the live copy on workspace 1, plus the shortcut
+and Do Not Disturb.
 
-**Pointer and keyboard follow workspace 1** — moving from one screen to the other means
-dragging the pointer across the edge. With this on, arriving on workspace 1 (trackpad
-gesture, scroll on the top bar, shortcut) puts the pointer on the secondary screen, at
-the spot it was over in the copy. Leaving workspace 1 brings it back to that spot on the
-primary screen — only if it was still on the secondary one. Leaving also takes the
-keyboard off a projected window, so what you type next stays private. Switching between
-private workspaces never moves them.
+**Smart pointer** — moving from one screen to the other means dragging the pointer
+across the edge. With this on:
 
-The trackpad gesture switches workspaces from the secondary screen too while the mode is
-on, whatever this option says.
+- Arriving on workspace 1 puts the pointer on the secondary screen, at the spot it was
+  over in the copy. Leaving brings it back to that spot on the primary screen, only if
+  it was still on the secondary one. Switching between private workspaces never moves it.
+- The trackpad swipe switches workspaces from the secondary screen too.
+- The overview keeps the pointer on the primary screen, where you can see it, until it
+  closes.
+- Pushing against the top edge of the secondary screen (a push like GNOME's hot corner,
+  not a touch: tabs and slide toolbars up there still work) jumps to the top bar, above
+  the pointer's place in the copy. Leaving the top bar downward goes back to the same
+  column, unless you opened a top bar menu in between.
 
-**Workspace 1 opens on the secondary screen** — workspace 1 *shows* the public screen,
-so launching an app from there means you want to show it. With this on, the window
-lands on the secondary screen instead of hiding under the copy. Windows that were on
-workspace 1 before the mode turned on are never shown to the room: they moved to
-workspace 2.
+**Smart windows** — workspace 1 *shows* the public screen. With this on:
+
+- A window opened on workspace 1 lands on the secondary screen instead of hiding under
+  the copy. Windows that were there before the mode turned on are never shown to the
+  room: they moved to workspace 2.
+- On workspace 1, Alt+Tab lists only the windows the room sees, through GNOME's own
+  *current workspace only* switch; your setting is back when you leave. From a private
+  workspace, Alt+Tab to a projected window goes back to workspace 1. Only Alt+Tab does
+  this: clicking the projected slides from your notes workspace leaves you there.
+- Leaving workspace 1 takes the keyboard off a projected window, so what you type next
+  stays private.
 
 **The shortcut** — `Super+E` on a window of the primary screen sends it to the
 secondary screen; on a window of the secondary screen, brings it back to the workspace
 it came from and switches there (never to workspace 1 while presenting). It works
 whether the mode is on or not. GNOME already has `Super+Shift+←/→`; this one needs no
-thinking about which side the screen is on. To change the key, click the *Shortcut*
-row in the preferences and press the new combination (Backspace restores `Super+E`).
-
-**Push the top edge to reach the top bar** — on workspace 1 your top bar sits right
-above the copy, so the reflex is to move the pointer up to it; but the pointer is on
-the secondary screen, which has no top bar. Push against its top edge (a push like
-GNOME's hot corner, not a touch: tabs and slide toolbars up there still work) and the
-pointer jumps to the top bar, above where it was in the copy. Leave the top bar
-downward and it goes back to the same column of the secondary screen — unless you
-opened a top bar menu in between.
-
-**Alt+Tab follows workspace 1** — the switcher shows up on the primary screen only, so
-from workspace 1 it is how you reach a projected window. While you are on workspace 1
-with the mode on, the extension sets GNOME's own *current workspace only* switch for
-Alt+Tab: workspace 1 is empty and the secondary screen's windows are on every
-workspace, so only they are listed. Leave workspace 1 and your setting is back. From
-a private workspace, Alt+Tab to a projected window switches to workspace 1, so you do
-not lose track of the presentation. Only Alt+Tab does this: clicking the projected
-slides from your notes workspace leaves you there.
+thinking about which side the screen is on. To change the key, click its row in the
+preferences and press the new combination (Backspace restores `Super+E`).
 
 ## Which screen is which
 

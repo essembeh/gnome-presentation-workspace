@@ -23,35 +23,18 @@ export default class PresentationWorkspaceExtension extends Extension {
         // Workspace each shared window came from, to bring it back there. The workspace
         // itself, not its index: inserting the mirror workspace shifts every index.
         this._origins = new WeakMap();
-        this._shortcutBound = false;
-        this._settings.connectObject('changed::share-shortcut', () => this._syncShortcut(), this);
-        this._syncShortcut();
+        Main.wm.addKeybinding('share-window', this._settings, Meta.KeyBindingFlags.NONE,
+            Shell.ActionMode.NORMAL, () => this._shareWindow());
     }
 
     disable() {
-        this._settings.disconnectObject(this);
-        if (this._shortcutBound)
-            Main.wm.removeKeybinding('share-window');
-        this._shortcutBound = false;
+        Main.wm.removeKeybinding('share-window');
         this._origins = null;
         this._indicator?.destroy();
         this._indicator = null;
         this._mode?.destroy();
         this._mode = null;
         this._settings = null;
-    }
-
-    _syncShortcut() {
-        const wanted = this._settings.get_boolean('share-shortcut');
-        if (wanted === this._shortcutBound)
-            return;
-        if (wanted) {
-            Main.wm.addKeybinding('share-window', this._settings, Meta.KeyBindingFlags.NONE,
-                Shell.ActionMode.NORMAL, () => this._shareWindow());
-        } else {
-            Main.wm.removeKeybinding('share-window');
-        }
-        this._shortcutBound = wanted;
     }
 
     /** Sends the focused window to the secondary screen, or brings it back to the primary one. */

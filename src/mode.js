@@ -144,8 +144,8 @@ export class PresentationMode extends Signals.EventEmitter {
         if (this._settings.get_boolean('mute-notifications'))
             force(this._settings, 'banners');
         this._settings.connectObject(
-            'changed::switcher-secondary', () => this._syncSwitcher(),
-            'changed::top-edge', () => this._syncTopEdge(), this);
+            'changed::smart-windows', () => this._syncSwitcher(),
+            'changed::smart-pointer', () => this._syncTopEdge(), this);
         this._syncSwitcher();
         this._syncTopEdge();
         this.emit('changed');
@@ -238,7 +238,7 @@ export class PresentationMode extends Signals.EventEmitter {
     /** The overview only shows on the primary screen: a pointer left on the other is lost. */
     _pullPointerToOverview() {
         const [x, y] = global.get_pointer();
-        if (this._settings.get_boolean('warp-pointer') &&
+        if (this._settings.get_boolean('smart-pointer') &&
             global.workspace_manager.get_active_workspace_index() === 0 &&
             contains(secondaryMonitor(), x, y))
             this._jumpPointer(false, x, y);
@@ -259,7 +259,7 @@ export class PresentationMode extends Signals.EventEmitter {
      * nothing else. Elsewhere, picking a window of the secondary screen goes to it.
      */
     _syncSwitcher() {
-        const enabled = this._active && this._settings.get_boolean('switcher-secondary');
+        const enabled = this._active && this._settings.get_boolean('smart-windows');
         if (enabled && global.workspace_manager.get_active_workspace_index() === 0)
             force(this._settings, 'switcher');
         else
@@ -313,9 +313,11 @@ export class PresentationMode extends Signals.EventEmitter {
      * exist there: it counts as started on the primary screen (spec §4.6).
      */
     _patchGesture() {
+        const mode = this;
         this._gestureInjections.overrideMethod(SwipeTracker.SwipeTracker.prototype, '_beginGesture',
             original => function (x, y) {
-                if (this === Main.wm._workspaceAnimation?._swipeTracker &&
+                if (mode._settings.get_boolean('smart-pointer') &&
+                    this === Main.wm._workspaceAnimation?._swipeTracker &&
                     contains(secondaryMonitor(), x, y)) {
                     const point = center(Main.layoutManager.primaryMonitor);
                     original.call(this, point.x, point.y);
@@ -324,7 +326,6 @@ export class PresentationMode extends Signals.EventEmitter {
                 original.call(this, x, y);
             });
 
-        const mode = this;
         const controller = WorkspaceAnimation.WorkspaceAnimationController.prototype;
         // Both or neither: without the end of the animation, the mirror would stay hidden.
         if (typeof controller._prepareWorkspaceSwitch !== 'function' ||
@@ -391,7 +392,7 @@ export class PresentationMode extends Signals.EventEmitter {
     }
 
     _syncTopEdge() {
-        const wanted = this._settings.get_boolean('top-edge');
+        const wanted = this._settings.get_boolean('smart-pointer');
         if (wanted && !this._topEdge) {
             this._topEdge = new TopEdge(() => secondaryMonitor(), () => this._mirror.visible);
         } else if (!wanted && this._topEdge) {
@@ -407,10 +408,11 @@ export class PresentationMode extends Signals.EventEmitter {
             return;
         const previous = this._workspaceIndex;
         this._workspaceIndex = global.workspace_manager.get_active_workspace_index();
-        if (!this._settings.get_boolean('warp-pointer'))
-            return;
-        if (moveFocus && previous === 0 && this._workspaceIndex !== 0)
+        if (moveFocus && previous === 0 && this._workspaceIndex !== 0 &&
+            this._settings.get_boolean('smart-windows'))
             this._queueFocusPrimary();
+        if (!this._settings.get_boolean('smart-pointer'))
+            return;
 
         const secondary = secondaryMonitor();
         const [x, y] = global.get_pointer();
@@ -488,7 +490,7 @@ export class PresentationMode extends Signals.EventEmitter {
 
     /** Workspace 1 shows the secondary screen: a window landing there belongs on it. */
     _onMirrorWindowAdded(window) {
-        if (!this._settings.get_boolean('auto-share') ||
+        if (!this._settings.get_boolean('smart-windows') ||
             window.get_window_type() !== Meta.WindowType.NORMAL || this._pending.has(window))
             return;
         if (window.get_compositor_private()?.is_mapped()) {

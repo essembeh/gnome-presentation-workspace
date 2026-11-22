@@ -124,9 +124,10 @@ corrige pas.
           └──────────────────────────────────────┘
   ```
 
-- **Un indicateur dans la topbar, seulement mode allumé** (parmi les icônes système,
-  comme celle d'enregistrement d'écran), une icône suivie d'un mot. Il répond à « la
-  salle voit-elle le bureau que je regarde ? » :
+- **Un indicateur dans la topbar, seulement mode allumé** : une icône suivie d'un mot,
+  **à droite** parmi les icônes système par défaut, ou **au centre**, juste à gauche de
+  l'heure (préférence `indicator-position`, deux choix : `Right`, `Center`). Il répond
+  à « la salle voit-elle le bureau que je regarde ? » :
   - bureau 1 : écran et `Mirror` en **rouge**, ce bureau est ce que voit la salle ;
   - autre bureau : cadenas et `Private` en **vert**, ce bureau n'est pas répliqué.
 
@@ -142,32 +143,27 @@ corrige pas.
 - **Une fenêtre de préférences** (`prefs.js`, libadwaita), ouverte de deux
   endroits : l'entrée « Preferences » du sous-menu, et le bouton réglages de
   l'application Extensions de GNOME, comme pour toute extension.
-- Les options y sont **regroupées par thème**, chacune avec une phrase qui dit ce
-  qu'elle fait — le menu, lui, n'en avait pas la place :
-
-  | Groupe        | Options                                                   |
-  | ------------- | --------------------------------------------------------- |
-  | Pointer       | curseur et clavier (§4.6), bord haut (§4.9)               |
-  | Windows       | bureau 1 → écran secondaire (§4.7), raccourci (§4.4)      |
-  | Alt+Tab       | Alt+Tab suit le bureau 1 (§4.8)                           |
-  | Notifications | Ne pas déranger (§4.5)                                    |
-
-- Des **interrupteurs** : un comportement se coupe, il ne se configure pas (§6). **Une
-  exception** : la combinaison du raccourci (§4.4), sous son interrupteur — on clique
-  la ligne et on presse la nouvelle combinaison (au moins un modificateur, Retour
-  arrière remet `Super+E`, Échap annule).
-- Historique : les options ont d'abord vécu dans le menu du bouton, sans fenêtre de
-  préférences. À six options sans explication, le menu devenait illisible ; le mode
-  se démarre plus souvent qu'il ne se règle.
+- Elle tient en **cinq lignes**, chacune avec une phrase qui dit ce qu'elle fait :
+  - **Smart pointer** : la gestion intelligente du curseur (§4.6, §4.9) ;
+  - **Smart windows** : la gestion intelligente des fenêtres (§4.6, §4.7, §4.8) ;
+  - **Do Not Disturb while presenting** (§4.5) ;
+  - **Indicator position** : un bouton à deux états, `Center` (juste à gauche de
+    l'heure) à gauche et `Right` à droite, sélectionné par défaut ;
+  - **Share window shortcut** : la combinaison du raccourci (§4.4). On clique la ligne
+    et on presse la nouvelle combinaison (au moins un modificateur, Retour arrière
+    remet `Super+E`, Échap annule).
+- Historique : les options ont d'abord vécu dans le menu du bouton, puis une par
+  comportement dans cette fenêtre. Six interrupteurs qu'on activait tous n'aidaient
+  personne : ils sont regroupés par intention (§6).
 
 - **Non persistant** : à chaque ouverture de session, le mode est éteint.
 - **Débrancher l'écran secondaire éteint le mode** (et restaure ce qu'il a
   modifié, §4.5).
 
-Allumer le mode déclenche le retour sur le bureau 1 (§4.2), et, **chacun selon son
-réglage (§6)** : le curseur dans le retour (§4.3), la coupure des bannières de
-notification (§4.5), le curseur et le clavier qui suivent le bureau 1 (§4.6) et
-l'envoi sur l'écran secondaire des fenêtres ouvertes sur le bureau 1 (§4.7).
+Allumer le mode déclenche le retour sur le bureau 1 (§4.2) avec le curseur dans le
+retour (§4.3), et, **selon les réglages (§6)** : la coupure des bannières de
+notification (§4.5), la gestion du curseur (§4.6, §4.9) et celle des fenêtres (§4.6,
+§4.7, §4.8).
 
 ### 4.2 Le retour sur le bureau 1
 
@@ -242,8 +238,8 @@ l'envoi sur l'écran secondaire des fenêtres ouvertes sur le bureau 1 (§4.7).
     courant — **jamais le bureau 1 quand le mode est allumé** : elle serait cachée
     sous le retour ; elle va alors sur le bureau 2.
 - Défaut : **`Super+E`** (« écran » ; `Super+P` est déjà le sélecteur d'affichage
-  de GNOME). Activable et **modifiable dans les préférences** (§4.1), clé
-  `share-window`.
+  de GNOME). **Modifiable dans les préférences** (§4.1), clé `share-window`. Pas
+  d'interrupteur : inutilisé, il ne gêne pas ; en conflit, on change la touche.
 - Actif **dès qu'un écran secondaire est présent**, mode allumé ou non.
 - L'état de la fenêtre (maximisée, plein écran) est conservé : c'est le
   comportement natif de `move_to_monitor`.
@@ -269,7 +265,7 @@ l'envoi sur l'écran secondaire des fenêtres ouvertes sur le bureau 1 (§4.7).
 
 Sans extension, passer d'un écran à l'autre oblige à faire glisser le pointeur
 jusqu'au bord. Le bureau 1 étant « l'écran secondaire », le pointeur suit les
-changements de bureau, mode allumé :
+changements de bureau, mode allumé et réglage `smart-pointer` actif :
 
 | Transition                        | Pointeur avant   | Effet                            |
 | --------------------------------- | ---------------- | -------------------------------- |
@@ -297,17 +293,18 @@ changements de bureau, mode allumé :
 - Pas de confinement : sur le bureau 1, le pointeur peut toujours revenir sur
   l'écran principal par le bord (pour atteindre le panel) ; il atterrit alors sur
   le retour, qui ne réagit pas aux clics.
-- **Le clavier suit aussi, en quittant le bureau 1** (même réglage) : si le focus est
-  resté sur une fenêtre de l'écran secondaire, il passe à la dernière fenêtre utilisée
-  du nouveau bureau sur l'écran principal. S'il n'y en a aucune, plus aucune fenêtre
-  n'a le focus : une frappe ne doit pas partir dans la fenêtre projetée. Décidé après
-  le changement de bureau, pour ne pas écraser une fenêtre activée explicitement. Rien
-  dans la vue d'ensemble, où le clic choisit la fenêtre.
+- **Le clavier suit aussi, en quittant le bureau 1** (réglage `smart-windows`, car il
+  protège ce qu'on tape, même curseur géré par GNOME) : si le focus est resté sur une
+  fenêtre de l'écran secondaire, il passe à la dernière fenêtre utilisée du nouveau
+  bureau sur l'écran principal. S'il n'y en a aucune, plus aucune fenêtre n'a le focus :
+  une frappe ne doit pas partir dans la fenêtre projetée. Décidé après le changement
+  de bureau, pour ne pas écraser une fenêtre activée explicitement. Rien dans la vue
+  d'ensemble, où le clic choisit la fenêtre.
 
-**Le geste de changement de bureau marche depuis l'écran secondaire**, mode allumé,
-sans réglage. GNOME ignore un geste qui démarre hors de l'écran principal quand les
-bureaux n'existent que sur celui-ci, ce qui bloquerait le geste sur le bureau 1. Le
-geste y est traité comme s'il démarrait sur l'écran principal
+**Le geste de changement de bureau marche depuis l'écran secondaire**, mode allumé et
+réglage `smart-pointer` actif. GNOME ignore un geste qui démarre hors de l'écran
+principal quand les bureaux n'existent que sur celui-ci, ce qui bloquerait le geste sur
+le bureau 1. Le geste y est traité comme s'il démarrait sur l'écran principal
 (`SwipeTracker._beginGesture`, limité au tracker des bureaux).
 
 ### 4.7 Le bureau 1 ouvre sur l'écran secondaire
@@ -316,8 +313,8 @@ Le bureau 1 *montre* l'écran secondaire : lancer une appli depuis le bureau 1, 
 vouloir la montrer. Sans extension, la fenêtre s'ouvre sur l'écran principal, cachée
 sous le retour.
 
-- Mode allumé, **une fenêtre qui arrive sur le bureau 1 de l'écran principal** est
-  envoyée sur l'écran secondaire : nouvelle fenêtre (lanceur, dash, raccourci) ou
+- Mode allumé et réglage `smart-windows` actif, **une fenêtre qui arrive sur le bureau
+  1 de l'écran principal** est envoyée sur l'écran secondaire : nouvelle fenêtre (lanceur, dash, raccourci) ou
   fenêtre déplacée vers le bureau 1.
 - **Les fenêtres déjà sur le bureau 1 à l'allumage du mode ne sont pas projetées** :
   ce serait montrer à la salle des fenêtres privées sans prévenir. Elles passent sur
@@ -359,8 +356,7 @@ secondaire, alors que depuis le bureau 1 on cherche une fenêtre **projetée**.
   (`AppSwitcherPopup._finish`, via `InjectionManager`), pas à `focus-window`.
 - Alt+Tab choisit une **application** : si elle a une fenêtre projetée et une privée,
   la plus récente est activée ; on ne bascule que si c'est la projetée.
-- **Une seule option** pour les deux comportements (même intention : Alt+Tab ne fait
-  pas perdre le fil). Coupée, c'est l'Alt+Tab de GNOME, sans retouche.
+- Réglage `smart-windows`. Coupé, c'est l'Alt+Tab de GNOME, sans retouche.
 
 ### 4.9 Le bord haut mène à la topbar
 
@@ -369,7 +365,8 @@ le bord haut de l'écran secondaire, vu dans le retour, touche la topbar. Le ré
 de monter la souris vers la topbar bute pourtant sur le bord haut de l'écran
 secondaire, qui n'a pas de topbar.
 
-- **Aller** : mode allumé, bureau 1 affiché, hors vue d'ensemble. **Pousser** le
+- **Aller** : mode allumé, réglage `smart-pointer` actif, bureau 1 affiché, hors vue
+  d'ensemble. **Pousser** le
   pointeur contre le bord haut de l'écran secondaire le place sur la topbar, **juste
   au-dessus de la pastille** dans le retour : même colonne, calculée avec le
   letterbox du retour (§5.1), au milieu de la hauteur de la topbar.
@@ -513,7 +510,9 @@ extensions pour les réglages rapides. Il porte :
 
 - l'icône de la topbar (`_addIndicator()`) et son libellé, visibles seulement mode
   allumé : rouge `#e01b24` sur le bureau 1, vert `#33d17a` ailleurs (classes
-  `presentation-indicator` et `presentation-mirrored`) ;
+  `presentation-indicator` et `presentation-mirrored`). Au centre, ils sont portés par
+  un `PanelMenu.Button` sans menu, ajouté en position 0 de la boîte centrale
+  (`Main.panel.addToStatusArea`, API publique), donc à gauche de l'heure ;
 - un `QuickMenuToggle` dans `quickSettingsItems` : `checked` suit le mode,
   `reactive` à `false` et sous-titre « No secondary screen » sans écran secondaire ;
   son menu a un en-tête (`setHeader`) et l'entrée Preferences
@@ -530,6 +529,7 @@ extensions pour les réglages rapides. Il porte :
 | Clone d'un plein écran   | `global.compositor.disable_unredirect` | faible                |
 | Position du curseur      | `Meta.CursorTracker`, publique         | faible                |
 | Réglages rapides         | `addExternalIndicator`, publique       | faible                |
+| Indicateur au centre     | `addToStatusArea`, publique            | faible                |
 | Raccourci                | `Main.wm.addKeybinding`                | faible                |
 | Ne pas déranger          | GSettings, publique                    | faible                |
 | Alt+Tab sur le bureau 1  | GSettings, relue à chaque Alt+Tab      | faible                |
@@ -558,30 +558,39 @@ extensions pour les réglages rapides. Il porte :
 ## 6. Réglages
 
 **Règle** : le retour sur le bureau 1 est le cœur de l'extension, il n'est pas
-optionnel. **Chaque comportement annexe** que le mode déclenche a son réglage, pour
-pouvoir le couper sans toucher au reste.
+optionnel. **Un réglage n'existe que s'il a un vrai cas d'usage désactivé** : les
+comportements annexes sont regroupés par intention, activés par défaut, et chaque
+groupe se coupe d'un coup pour retrouver GNOME standard.
 
 | Clé                  | Type | Défaut                | Comportement (§)                    | Préférences |
 | -------------------- | ---- | --------------------- | ----------------------------------- | ----------- |
-| `warp-pointer`       | bool | `false`               | curseur et clavier suivent (§4.6)   | oui         |
-| `auto-share`         | bool | `false`               | bureau 1 → écran secondaire (§4.7)  | oui         |
-| `share-shortcut`     | bool | `true`                | raccourci partager/reprendre (§4.4) | oui         |
+| `smart-pointer`      | bool | `true`                | gestion du curseur (§4.6, §4.9)     | oui         |
+| `smart-windows`      | bool | `true`                | gestion des fenêtres (§4.7, §4.8)   | oui         |
 | `share-window`       | as   | `['<Super>e']`        | la combinaison du raccourci         | oui         |
 | `mute-notifications` | bool | `true`                | Ne pas déranger auto (§4.5)         | oui         |
+| `indicator-position` | s    | `'right'`             | position de l'indicateur (§4.1)     | oui         |
 | `banners-muted`      | bool | `false`               | état interne de §4.5                | non         |
-| `switcher-secondary` | bool | `true`                | Alt+Tab suit le bureau 1 (§4.8)     | oui         |
 | `switcher-forced`    | bool | `false`               | état interne de §4.8                | non         |
-| `top-edge`           | bool | `true`                | bord haut → topbar (§4.9)           | oui         |
 
-La pastille du curseur (§4.3) n'est **pas** une option : sans elle le retour perd
-son sens. Les deux comportements qui déplacent pointeur ou fenêtres d'eux-mêmes
-(§4.6, §4.7) sont **désactivés par défaut** : surprenants, on les choisit.
+- `smart-pointer` : le curseur suit le bureau 1 en gardant sa place, le geste marche
+  depuis l'écran secondaire, la vue d'ensemble garde le curseur visible (§4.6), le bord
+  haut mène à la topbar (§4.9).
+- `smart-windows` : ouverture sur l'écran secondaire depuis le bureau 1 (§4.7), Alt+Tab
+  (§4.8), le clavier quitte les fenêtres projetées (§4.6).
+- **Toujours actif**, car cela fait partie du retour : la pastille (§4.3), la libération
+  et le maintien du bureau 1 (§4.2), son glissement (§4.2), son aperçu en vue d'ensemble
+  (§4.10), l'indicateur `Mirror` / `Private` (§4.1). Le raccourci aussi (§4.4). Les deux
+  réglages coupés, le mode se réduit donc à ça, plus Ne pas déranger selon son réglage.
+- Ces deux clés remplacent `warp-pointer`, `auto-share`, `share-shortcut`,
+  `switcher-secondary` et `top-edge`. Les anciens choix **ne sont pas repris** : à
+  signaler dans les notes de version.
 
 Pas d'option de **paramétrage fin** au-delà : le bureau du retour (toujours le 1),
 la couleur de la pastille (accent), le choix de l'écran secondaire (le premier non
 principal) sont des choix de l'extension. Un comportement se coupe, il ne se
-configure pas — seule exception, la combinaison du raccourci (§4.1, §4.4) : une touche
-est une affaire de doigts, pas de réglage fin.
+configure pas — deux exceptions : la combinaison du raccourci (§4.1, §4.4), une touche
+étant une affaire de doigts, et la position de l'indicateur (§4.1), limitée à deux
+choix.
 
 ---
 

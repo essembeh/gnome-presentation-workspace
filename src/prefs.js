@@ -6,52 +6,24 @@ import Gtk from 'gi://Gtk';
 import {ExtensionPreferences}
     from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-// Grouped by theme (spec §4.1). Every option switches one side behavior on or off;
-// the share-window key is the one setting that is not a switch.
-const GROUPS = [
-    {
-        title: 'Pointer',
-        options: [
-            ['warp-pointer', 'Pointer and keyboard follow workspace 1',
-                'Arriving on workspace 1 puts the pointer on the secondary screen, at the ' +
-                'spot it was over in the mirror. Leaving it brings the pointer back to ' +
-                'that spot on the primary screen, and takes the keyboard off projected ' +
-                'windows.'],
-            ['top-edge', 'Push the top edge to reach the top bar',
-                'On workspace 1, push the pointer against the top of the secondary screen: ' +
-                'it lands on the top bar, right above its place in the mirror. Going back ' +
-                'down from the top bar returns it to the secondary screen.'],
-        ],
-    },
-    {
-        title: 'Windows',
-        options: [
-            ['auto-share', 'Workspace 1 opens on the secondary screen',
-                'A window opened or moved to workspace 1 goes to the secondary screen ' +
-                'instead of hiding under the mirror. Windows already there when the mode ' +
-                'turns on move to workspace 2, never to the room.'],
-            ['share-shortcut', 'Share window shortcut',
-                'The shortcut below sends the focused window to the secondary screen, or ' +
-                'brings it back to the workspace it came from. Works with the mode off too.'],
-        ],
-    },
-    {
-        title: 'Alt+Tab',
-        options: [
-            ['switcher-secondary', 'Alt+Tab follows workspace 1',
-                'On workspace 1, Alt+Tab lists only the windows the room sees. From a ' +
-                'private workspace, picking one of them goes back to workspace 1. Off: ' +
-                'GNOME\'s own Alt+Tab, untouched.'],
-        ],
-    },
-    {
-        title: 'Notifications',
-        options: [
-            ['mute-notifications', 'Do Not Disturb while presenting',
-                'Notification banners stay off while the mode is on, and your previous ' +
-                'setting comes back afterwards, even after a crash of GNOME Shell.'],
-        ],
-    },
+// Spec §6: a switch exists only if turning it off has a real use.
+const SWITCHES = [
+    ['smart-pointer', 'Smart pointer',
+        'The pointer follows workspace 1 and keeps its place, the trackpad swipe works ' +
+        'from the secondary screen, the overview keeps the pointer visible, and pushing ' +
+        'the top edge reaches the top bar. Off: GNOME\'s own pointer behavior.'],
+    ['smart-windows', 'Smart windows',
+        'Windows opened on workspace 1 go to the secondary screen, Alt+Tab follows ' +
+        'workspace 1, and leaving it takes the keyboard off projected windows. Off: ' +
+        'GNOME\'s own behavior.'],
+    ['mute-notifications', 'Do Not Disturb while presenting',
+        'Notification banners stay off while the mode is on, and your previous ' +
+        'setting comes back afterwards, even after a crash of GNOME Shell.'],
+];
+
+const POSITIONS = [
+    ['center', 'Center'],
+    ['right', 'Right'],
 ];
 
 export default class PresentationWorkspacePrefs extends ExtensionPreferences {
@@ -61,29 +33,43 @@ export default class PresentationWorkspacePrefs extends ExtensionPreferences {
         window._settings = settings;
 
         const page = new Adw.PreferencesPage({
-            description: 'Each option switches one behavior of the presentation mode on ' +
-                'or off. They apply right away, even with the mode on.',
+            description: 'The mirror on workspace 1 is always on. These options apply ' +
+                'right away, even with the mode on.',
         });
         window.add(page);
 
-        for (const {title, options} of GROUPS) {
-            const group = new Adw.PreferencesGroup({title});
-            page.add(group);
-            for (const [key, rowTitle, subtitle] of options) {
-                const row = new Adw.SwitchRow({title: rowTitle, subtitle});
-                settings.bind(key, row, 'active', Gio.SettingsBindFlags.DEFAULT);
-                group.add(row);
-                if (key === 'share-shortcut')
-                    group.add(this._shortcutRow(window, settings));
-            }
+        const group = new Adw.PreferencesGroup();
+        page.add(group);
+        for (const [key, title, subtitle] of SWITCHES) {
+            const row = new Adw.SwitchRow({title, subtitle});
+            settings.bind(key, row, 'active', Gio.SettingsBindFlags.DEFAULT);
+            group.add(row);
         }
+        group.add(this._positionRow(settings));
+        group.add(this._shortcutRow(window, settings));
+    }
+
+    _positionRow(settings) {
+        const row = new Adw.ActionRow({
+            title: 'Indicator position',
+            subtitle: 'Where the top bar shows Mirror or Private while the mode is on. ' +
+                'Center is just left of the clock.',
+        });
+        const toggles = new Adw.ToggleGroup({valign: Gtk.Align.CENTER});
+        for (const [name, label] of POSITIONS)
+            toggles.add(new Adw.Toggle({name, label}));
+        settings.bind('indicator-position', toggles, 'active-name',
+            Gio.SettingsBindFlags.DEFAULT);
+        row.add_suffix(toggles);
+        return row;
     }
 
     /** The share-window key: click, then press the new combination. */
     _shortcutRow(window, settings) {
         const row = new Adw.ActionRow({
-            title: 'Shortcut',
-            subtitle: 'Click to change it',
+            title: 'Share window shortcut',
+            subtitle: 'Sends the focused window to the secondary screen, or brings it ' +
+                'back. Works with the mode off too. Click to change it.',
             activatable: true,
         });
         const label = new Gtk.ShortcutLabel({
@@ -96,7 +82,6 @@ export default class PresentationWorkspacePrefs extends ExtensionPreferences {
         settings.connect('changed::share-window', sync);
         sync();
         row.add_suffix(label);
-        settings.bind('share-shortcut', row, 'sensitive', Gio.SettingsBindFlags.GET);
         row.connect('activated', () => this._captureShortcut(window, settings));
         return row;
     }

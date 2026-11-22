@@ -38,14 +38,16 @@ all apply here.
 - **Never assume laptop = private and external = public.** The private screen is
   GNOME's **primary** monitor, the public one the **first non-primary** monitor.
   Code, UI strings and docs say primary/secondary, never laptop/external/projector.
-- **Every side behavior of the mode has its own on/off setting** (pointer warp,
-  auto-share, shortcut, Do Not Disturb, Alt+Tab, top edge). The mirror and its cursor dot are not
-  optional.
+- **A setting exists only if turning it off has a real use.** Side behaviors are
+  grouped by intent, on by default: `smart-pointer` (pointer follows, swipe from the
+  secondary screen, overview, top edge) and `smart-windows` (auto-share, Alt+Tab,
+  keyboard leaving projected windows). Do Not Disturb has its own switch. The mirror,
+  its dot, its slide and overview preview, and the top bar state are not optional.
   Settings switch a behavior off; they do not tune it — the share-window key
-  combination is the one exception.
+  combination and the top bar state's position are the only exceptions.
 - **Quick Settings holds the mode switch and "Preferences" only**; the extension adds
-  nothing to the top bar while the mode is off. The options live in `prefs.js`,
-  grouped by theme with one explanatory line each.
+  nothing to the top bar while the mode is off. The options live in `prefs.js`, with
+  one explanatory line each.
 - **Whatever the mode changes is restored**: `show-banners` back to its original
   value, the app switcher's `current-workspace-only` too, the workspace keep-alive
   removed — including after a shell crash (`banners-muted`, `switcher-forced`).
@@ -103,6 +105,8 @@ gresource extract "$(ls "$d"/lib/gnome-shell/libshell-*.so | head -1)" \
 - `layout.js`: `PressureBarrier`, `hotCorners`, `setBarrierSize`, `panelBox`.
 - `quickSettings.js`: `SystemIndicator`, `QuickMenuToggle`, `_addIndicator`,
   `addExternalIndicator`.
+- `panel.js`, `panelMenu.js`: `addToStatusArea` with the center box, the clock still
+  in it, `PanelMenu.Button` without a menu, `setSensitive`.
 
 **2. Run `just check`, then `just install`**, and ask Seb to log out and back in.
 
@@ -110,7 +114,8 @@ gresource extract "$(ls "$d"/lib/gnome-shell/libshell-*.so | head -1)" \
 
 - **Mode:** the Quick Settings button is greyed out without a second screen. The top
   bar shows a red "Mirror" on workspace 1, a green "Private" elsewhere, nothing with the
-  mode off. Unplugging the screen turns the mode off.
+  mode off, left of the clock or at the right depending on the preference, which applies
+  right away. Unplugging the screen turns the mode off.
 - **Mirror:** live, ratio kept with black bands, blue dot on the pointer, top bar and
   menus above it, clicks ignored. Workspace 1 survives while empty. Windows already on
   it move to workspace 2 when the mode turns on.
@@ -131,7 +136,8 @@ gresource extract "$(ls "$d"/lib/gnome-shell/libshell-*.so | head -1)" \
   corner, without opening the overview. Typing lands in the new workspace's window, and
   never in a projected window when that workspace is empty.
 - **Restoration:** turning the mode off restores Do Not Disturb and Alt+Tab settings.
-  Every preference switches its behavior off right away.
+  With Smart pointer and Smart windows off, right away, the pointer, Alt+Tab and new
+  windows behave like plain GNOME.
 
 **4. Read the log** after these tests. Any line here is a regression to fix, including
 the "mirror slide" ones: the fallback keeps the session usable but hides a broken hook.

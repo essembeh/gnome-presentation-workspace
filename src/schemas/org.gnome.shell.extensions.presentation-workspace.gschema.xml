@@ -1,50 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
   <schema id="org.gnome.shell.extensions.presentation-workspace" path="/org/gnome/shell/extensions/presentation-workspace/">
-    <key name="warp-pointer" type="b">
-      <default>false</default>
-      <summary>Move the pointer and keyboard with workspace 1</summary>
-      <description>Arriving on workspace 1 puts the pointer on the secondary screen, at the spot it was over in the mirror; leaving it with the pointer still there brings it back to that spot on the primary screen, and keyboard focus leaves the secondary screen.</description>
-    </key>
-    <key name="auto-share" type="b">
-      <default>false</default>
-      <summary>Windows opened on workspace 1 go to the secondary screen</summary>
-      <description>While the mode is on, a window arriving on workspace 1 of the primary screen (new, or moved there) is sent to the secondary screen. Windows already there when the mode turns on are left alone.</description>
-    </key>
-    <key name="share-shortcut" type="b">
+    <key name="smart-pointer" type="b">
       <default>true</default>
-      <summary>Share window shortcut</summary>
-      <description>Enable the share-window shortcut.</description>
+      <summary>Smart pointer</summary>
+      <description>While the mode is on: the pointer follows workspace 1 and keeps its place, the workspace swipe works from the secondary screen, the overview keeps the pointer on the primary screen, and pushing the secondary screen's top edge reaches the top bar. Off: GNOME's own pointer behavior.</description>
+    </key>
+    <key name="smart-windows" type="b">
+      <default>true</default>
+      <summary>Smart windows</summary>
+      <description>While the mode is on: windows opened on workspace 1 go to the secondary screen, Alt+Tab lists the projected windows on workspace 1 and goes back to it from a private workspace, and leaving workspace 1 takes keyboard focus off projected windows. Off: GNOME's own behavior.</description>
     </key>
     <key name="share-window" type="as">
       <default><![CDATA[['<Super>e']]]></default>
       <summary>Share or take back the focused window</summary>
-      <description>Sends the focused window to the secondary screen, or brings it back to the primary one. Not in the menu: change it with gsettings or dconf.</description>
+      <description>Sends the focused window to the secondary screen, or brings it back to the primary one. Can be changed in the preferences.</description>
     </key>
     <key name="mute-notifications" type="b">
       <default>true</default>
       <summary>Do Not Disturb while presenting</summary>
       <description>Turn notification banners off while the presentation mode is on, and restore them after.</description>
     </key>
+    <key name="indicator-position" type="s">
+      <choices>
+        <choice value="right"/>
+        <choice value="center"/>
+      </choices>
+      <default>'right'</default>
+      <summary>Position of the Mirror/Private indicator</summary>
+      <description>Where the top bar shows the state while the mode is on: right (with the system icons) or center (just left of the clock).</description>
+    </key>
     <key name="banners-muted" type="b">
       <default>false</default>
       <summary>Internal: banners muted by the extension</summary>
       <description>Set while the extension holds the notification banners off, so they are restored even after a crash.</description>
     </key>
-    <key name="switcher-secondary" type="b">
-      <default>true</default>
-      <summary>Alt+Tab follows workspace 1</summary>
-      <description>While the mode is on: on workspace 1, the application switcher lists the current workspace only, that is the secondary screen's windows (restored when leaving workspace 1); on another workspace, picking a window of the secondary screen switches to workspace 1. Off: GNOME's own Alt+Tab.</description>
-    </key>
     <key name="switcher-forced" type="b">
       <default>false</default>
       <summary>Internal: application switcher restricted by the extension</summary>
       <description>Set while the extension holds the switcher on the current workspace, so it is restored even after a crash.</description>
-    </key>
-    <key name="top-edge" type="b">
-      <default>true</default>
-      <summary>Push the top edge of the secondary screen to reach the top bar</summary>
-      <description>On workspace 1, pushing the pointer against the top edge of the secondary screen moves it to the top bar, above its place in the mirror; leaving the top bar downward takes it back.</description>
     </key>
   </schema>
 </schemalist>
