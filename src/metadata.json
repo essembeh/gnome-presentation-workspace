@@ -3,8 +3,8 @@
     "name": "Presentation workspace",
     "description": "Complete GNOME's extended mode for presenting and teaching: the projected screen is mirrored on workspace 1, the other workspaces stay private",
     "shell-version": ["50"],
-    "version": 3,
-    "version-name": "3",
+    "version": 4,
+    "version-name": "4",
     "settings-schema": "org.gnome.shell.extensions.presentation-workspace",
     "url": "https://github.com/essembeh/gnome-presentation-workspace"
 }
