@@ -4,11 +4,12 @@ import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as QuickSettings from 'resource:///org/gnome/shell/ui/quickSettings.js';
 
 const ICON = 'video-display-symbolic';
 const PRIVATE_ICON = 'changes-prevent-symbolic';
-const CENTER_ROLE = 'presentation-workspace-state';
+const BUTTON_ROLE = 'presentation-workspace-state';
 
 /** The Quick Settings button: turns the mode on and off, its menu opens the preferences. */
 const PresentationToggle = GObject.registerClass(
@@ -43,26 +44,55 @@ class PresentationToggle extends QuickSettings.QuickMenuToggle {
     }
 });
 
+/** The top bar button while the mode is on: the state, picture-in-picture, preferences. */
+const StateButton = GObject.registerClass(
+class StateButton extends PanelMenu.Button {
+    _init(mode, extension) {
+        super._init(0.0, 'Presentation state');
+        this._mode = mode;
+
+        const box = new St.BoxLayout({style_class: 'panel-status-menu-box'});
+        this._icon = new St.Icon({style_class: 'system-status-icon presentation-indicator'});
+        this._label = new St.Label({
+            style_class: 'presentation-indicator presentation-indicator-label',
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        box.add_child(this._icon);
+        box.add_child(this._label);
+        this.add_child(box);
+
+        this._pip = new PopupMenu.PopupSwitchMenuItem('Picture-in-picture', false);
+        this._pip.connect('toggled', (_item, state) => this._mode.setPip(state));
+        this.menu.addMenuItem(this._pip);
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.menu.addAction('Preferences', () => extension.openPreferences());
+    }
+
+    sync() {
+        const mirrored = global.workspace_manager.get_active_workspace_index() === 0;
+        this._icon.icon_name = mirrored ? ICON : PRIVATE_ICON;
+        this._label.text = mirrored ? 'Mirror' : 'Private';
+        for (const actor of [this._icon, this._label]) {
+            if (mirrored)
+                actor.add_style_class_name('presentation-mirrored');
+            else
+                actor.remove_style_class_name('presentation-mirrored');
+        }
+        this._pip.setToggleState(this._mode.pip);
+    }
+});
+
 /**
- * Spec §4.1: a Quick Settings button and, only while the mode is on, a top bar state:
- * red "Mirror" on workspace 1, green "Private" elsewhere, left of the clock or at the
- * right of the bar.
+ * Spec §4.1: a Quick Settings button and, only while the mode is on, a top bar button
+ * showing a red "Mirror" on workspace 1 and a green "Private" elsewhere.
  */
 export const PresentationIndicator = GObject.registerClass(
 class PresentationIndicator extends QuickSettings.SystemIndicator {
     _init(mode, extension) {
         super._init();
         this._mode = mode;
-        this._settings = extension.getSettings();
-        this._center = null;
-
-        this._icon = this._addIndicator();
-        this._icon.add_style_class_name('presentation-indicator');
-        this._label = new St.Label({
-            style_class: 'presentation-indicator presentation-indicator-label',
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-        this.add_child(this._label);
+        this._extension = extension;
+        this._button = null;
 
         this._toggle = new PresentationToggle(mode, extension);
         this.quickSettingsItems.push(this._toggle);
@@ -70,65 +100,29 @@ class PresentationIndicator extends QuickSettings.SystemIndicator {
         this._mode.connectObject('changed', () => this._sync(), this);
         global.workspace_manager.connectObject(
             'active-workspace-changed', () => this._sync(), this);
-        this._settings.connectObject('changed::indicator-position', () => this._sync(), this);
         this._sync();
     }
 
     _sync() {
-        const active = this._mode.active;
-        const centered = this._settings.get_string('indicator-position') === 'center';
-        this._syncCenter(active && centered);
-
-        const mirrored = global.workspace_manager.get_active_workspace_index() === 0;
-        const states = [[this._icon, this._label]];
-        if (this._center)
-            states.push([this._centerIcon, this._centerLabel]);
-        for (const [icon, label] of states) {
-            icon.icon_name = mirrored ? ICON : PRIVATE_ICON;
-            label.text = mirrored ? 'Mirror' : 'Private';
-            for (const actor of [icon, label]) {
-                if (mirrored)
-                    actor.add_style_class_name('presentation-mirrored');
-                else
-                    actor.remove_style_class_name('presentation-mirrored');
-            }
-        }
-        // The label first: the indicator hides once the icon's change finds nothing visible.
-        this._label.visible = active && !centered;
-        this._icon.visible = active && !centered;
+        this._syncButton(this._mode.active);
+        this._button?.sync();
         this._toggle.sync();
     }
 
-    /** The state left of the clock: a menuless panel button, position 0 of the center box. */
-    _syncCenter(wanted) {
-        if (wanted && !this._center) {
-            this._center = new PanelMenu.Button(0.0, 'Presentation state', true);
-            this._center.setSensitive(false);
-            const box = new St.BoxLayout({style_class: 'panel-status-menu-box'});
-            this._centerIcon = new St.Icon({
-                style_class: 'system-status-icon presentation-indicator',
-            });
-            this._centerLabel = new St.Label({
-                style_class: 'presentation-indicator presentation-indicator-label',
-                y_align: Clutter.ActorAlign.CENTER,
-            });
-            box.add_child(this._centerIcon);
-            box.add_child(this._centerLabel);
-            this._center.add_child(box);
-            Main.panel.addToStatusArea(CENTER_ROLE, this._center, 0, 'center');
-        } else if (!wanted && this._center) {
-            this._center.destroy();
-            this._center = null;
-            this._centerIcon = null;
-            this._centerLabel = null;
+    _syncButton(wanted) {
+        if (wanted && !this._button) {
+            this._button = new StateButton(this._mode, this._extension);
+            Main.panel.addToStatusArea(BUTTON_ROLE, this._button, 0, 'right');
+        } else if (!wanted && this._button) {
+            this._button.destroy();
+            this._button = null;
         }
     }
 
     destroy() {
         this._mode.disconnectObject(this);
         global.workspace_manager.disconnectObject(this);
-        this._settings.disconnectObject(this);
-        this._syncCenter(false);
+        this._syncButton(false);
         this.quickSettingsItems.forEach(item => item.destroy());
         super.destroy();
     }

@@ -11,14 +11,17 @@ import * as WorkspaceUI from 'resource:///org/gnome/shell/ui/workspace.js';
 import * as Signals from 'resource:///org/gnome/shell/misc/signals.js';
 
 import {
-    center, contains, mirrorView, pointerTarget, toMirrorPoint, toSecondaryPoint,
+    center, contains, mirrorView, pipRect, pointerTarget, toMirrorPoint, toSecondaryPoint,
 } from './geometry.js';
 import {Mirror} from './mirror.js';
+import {Pip} from './pip.js';
 import {TopEdge} from './topedge.js';
 
 // The shell's keep-alive is a one-shot timer: re-arm it well before it expires.
 const KEEP_ALIVE_MS = 60 * 60 * 1000;
 const KEEP_ALIVE_REFRESH_S = 10 * 60;
+const PIP_MARGIN = 16;
+const PIP_WIDTH_PERCENT = 20;
 
 /** First non-primary monitor: the public screen. The primary one is the private screen. */
 export function secondaryMonitor() {
@@ -70,6 +73,7 @@ export class PresentationMode extends Signals.EventEmitter {
         this._settings = settings;
         this._active = false;
         this._mirror = null;
+        this._pip = null;
         this._keptWorkspace = null;
         this._keepAliveSourceId = 0;
         // New windows on workspace 1, waiting to be shown (i.e. placed) before moving.
@@ -95,6 +99,36 @@ export class PresentationMode extends Signals.EventEmitter {
 
     get available() {
         return secondaryMonitor() !== null;
+    }
+
+    get pip() {
+        return this._pip !== null;
+    }
+
+    setPip(enabled) {
+        this._settings.set_boolean('pip-enabled', enabled);
+    }
+
+    /** The small live copy on private workspaces, as the saved switch says (spec §4.11). */
+    _syncPip() {
+        const enabled = this._settings.get_boolean('pip-enabled');
+        if (enabled === this.pip)
+            return;
+        if (enabled) {
+            this._pip = new Pip(corner => {
+                this._settings.set_string('pip-corner', corner);
+                this._updateGeometry();
+            }, time => global.workspace_manager.get_workspace_by_index(0).activate(time));
+            Main.layoutManager.uiGroup.insert_child_above(this._pip, this._mirror);
+            this._updateGeometry();
+            this._syncBorder();
+            const [x, y] = global.get_pointer();
+            this._pip.setPointer(x, y);
+        } else {
+            this._pip.destroy();
+            this._pip = null;
+        }
+        this._updateVisibility();
     }
 
     toggle() {
@@ -148,9 +182,14 @@ export class PresentationMode extends Signals.EventEmitter {
         this._settings.connectObject(
             'changed::smart-windows', () => this._syncSwitcher(),
             'changed::smart-pointer', () => this._syncTopEdge(),
-            'changed::mirror-border', () => this._syncBorder(), this);
+            'changed::mirror-border', () => this._syncBorder(),
+            'changed::pip-enabled', () => {
+                this._syncPip();
+                this.emit('changed');
+            }, this);
         this._syncSwitcher();
         this._syncTopEdge();
+        this._syncPip();
         this.emit('changed');
     }
 
@@ -183,6 +222,8 @@ export class PresentationMode extends Signals.EventEmitter {
 
         global.compositor.enable_unredirect();
 
+        this._pip?.destroy();
+        this._pip = null;
         this._mirror.destroy();
         this._mirror = null;
 
@@ -476,17 +517,24 @@ export class PresentationMode extends Signals.EventEmitter {
     }
 
     _syncBorder() {
-        this._mirror.setBorder(this._settings.get_boolean('mirror-border'));
+        const visible = this._settings.get_boolean('mirror-border');
+        this._mirror.setBorder(visible);
+        this._pip?.setBorder(visible);
     }
 
     _updateGeometry() {
         const workArea = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
-        this._mirror.setGeometry(workArea, secondaryMonitor());
+        const secondary = secondaryMonitor();
+        this._mirror.setGeometry(workArea, secondary);
+        this._pip?.setGeometry(pipRect(workArea, secondary,
+            this._settings.get_string('pip-corner'), PIP_WIDTH_PERCENT, PIP_MARGIN), secondary);
     }
 
     _updateVisibility() {
-        this._mirror.visible = global.workspace_manager.get_active_workspace_index() === 0 &&
-            !Main.overview.visible && !this._sliding;
+        const mirrored = global.workspace_manager.get_active_workspace_index() === 0;
+        this._mirror.visible = mirrored && !Main.overview.visible && !this._sliding;
+        if (this._pip)
+            this._pip.visible = !mirrored && !Main.overview.visible;
         this._topEdge?.sync();
     }
 
@@ -553,11 +601,12 @@ export class PresentationMode extends Signals.EventEmitter {
     }
 
     _trackCursor() {
-        this._cursorTracker.connectObject('position-invalidated', () => {
+        const sync = () => {
             const [x, y] = global.get_pointer();
             this._mirror.setPointer(x, y);
-        }, this);
-        const [x, y] = global.get_pointer();
-        this._mirror.setPointer(x, y);
+            this._pip?.setPointer(x, y);
+        };
+        this._cursorTracker.connectObject('position-invalidated', sync, this);
+        sync();
     }
 }

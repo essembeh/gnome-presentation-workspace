@@ -64,6 +64,27 @@ export function mirrorView(workArea, secondary) {
     };
 }
 
+/** The picture-in-picture in a corner of the work area, ratio kept, never past its height. */
+export function pipRect(workArea, secondary, corner, percent, margin) {
+    const fit = letterbox(workArea.width * percent / 100, workArea.height - 2 * margin,
+        secondary.width, secondary.height);
+    return {
+        x: corner.endsWith('left')
+            ? workArea.x + margin : workArea.x + workArea.width - margin - fit.width,
+        y: corner.startsWith('top')
+            ? workArea.y + margin : workArea.y + workArea.height - margin - fit.height,
+        width: fit.width,
+        height: fit.height,
+    };
+}
+
+/** The work area corner closest to a point. */
+export function nearestCorner(workArea, x, y) {
+    const vertical = y < workArea.y + workArea.height / 2 ? 'top' : 'bottom';
+    const horizontal = x < workArea.x + workArea.width / 2 ? 'left' : 'right';
+    return `${vertical}-${horizontal}`;
+}
+
 /** Where a secondary screen column appears in the mirror. */
 export function toMirrorX(view, secondary, x) {
     return Math.round(view.x + (x - secondary.x) * view.scale);

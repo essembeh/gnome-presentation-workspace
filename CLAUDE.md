@@ -4,8 +4,9 @@
 secondary screen in extended (joined) mode**: workspace 1 of the primary screen shows
 a live mirror of the secondary screen, the other workspaces stay private. It replaces
 an OBS projector window. A Quick Settings button turns the mode on and off and
-opens the preferences; while the mode is on, the top bar shows a red "Mirror" on
-workspace 1 and a green "Private" on the others.
+opens the preferences; while the mode is on, a top bar button shows a red "Mirror" on
+workspace 1 and a green "Private" on the others, with a menu for the picture-in-picture
+and the preferences.
 
 GNOME **50** (NixOS stable), pure GJS/ESM, **no build step**. Shipped code lives in
 `src/`, dev helpers in `tests/`.
@@ -45,9 +46,10 @@ all apply here.
   the mirror's red border (on by default). The mirror, its dot, its slide and overview
   preview, and the top bar state are not optional.
   Settings switch a behavior off; they do not tune it — the share-window key
-  combination and the top bar state's position are the only exceptions.
+  combination is the only exception.
 - **Quick Settings holds the mode switch and "Preferences" only**; the extension adds
-  nothing to the top bar while the mode is off. The options live in `prefs.js`, with
+  nothing to the top bar while the mode is off. While on, its top bar button holds the
+  picture-in-picture switch and "Preferences". The options live in `prefs.js`, with
   one explanatory line each.
 - **Whatever the mode changes is restored**: `show-banners` back to its original
   value, the app switcher's `current-workspace-only` too, the workspace keep-alive
@@ -104,10 +106,9 @@ gresource extract "$(ls "$d"/lib/gnome-shell/libshell-*.so | head -1)" \
   `cachedWindows`.
 - `workspace.js`: `Workspace._isMyWindow`, `metaWorkspace`, `monitorIndex`.
 - `layout.js`: `PressureBarrier`, `hotCorners`, `setBarrierSize`, `panelBox`.
-- `quickSettings.js`: `SystemIndicator`, `QuickMenuToggle`, `_addIndicator`,
-  `addExternalIndicator`.
-- `panel.js`, `panelMenu.js`: `addToStatusArea` with the center box, the clock still
-  in it, `PanelMenu.Button` without a menu, `setSensitive`.
+- `quickSettings.js`: `SystemIndicator`, `QuickMenuToggle`, `addExternalIndicator`.
+- `panel.js`, `panelMenu.js`, `popupMenu.js`: `addToStatusArea` with the right box,
+  `PanelMenu.Button`, `PopupSwitchMenuItem` and its `toggled` signal, `setToggleState`.
 
 **2. Run `just check`, then `just install`**, and ask Seb to log out and back in.
 
@@ -115,8 +116,11 @@ gresource extract "$(ls "$d"/lib/gnome-shell/libshell-*.so | head -1)" \
 
 - **Mode:** the Quick Settings button is greyed out without a second screen. The top
   bar shows a red "Mirror" on workspace 1, a green "Private" elsewhere, nothing with the
-  mode off, left of the clock or at the right depending on the preference, which applies
-  right away. Unplugging the screen turns the mode off.
+  mode off. Its menu opens the preferences. Unplugging the screen turns the mode off.
+- **Picture-in-picture:** its switch is kept across sessions. On private workspaces only,
+  never in the overview, clear of the top bar. A drag snaps it to the nearest corner,
+  kept after a restart. A double-click goes to workspace 1. The red border preference
+  applies to it right away. **Switching workspace mid-drag never leaves input stuck.**
 - **Mirror:** live, ratio kept with black bands, blue dot on the pointer, top bar and
   menus above it, clicks ignored. The optional red border frames the projected image,
   slides with it, and never reaches the secondary screen. Workspace 1 survives while

@@ -44,11 +44,13 @@ slides stay up while you read your notes.
 ## What it does
 
 - 📽️ **One button in Quick Settings**, next to Wi-Fi and Do Not Disturb, with the
-  preferences one click away. While presenting, the top bar shows a red **Mirror** on
-  workspace 1 and a green **Private** on the others, at the right of the bar or in the
-  center, just left of the clock; otherwise the extension adds nothing there. Private
-  is about the workspace you are on: the room still sees the secondary screen. The mode
-  is off at every login and turns on in one click.
+  preferences one click away. While presenting, a top bar button shows a red **Mirror**
+  on workspace 1 and a green **Private** on the others; otherwise the extension adds
+  nothing there. Private is about the workspace you are on: the room still sees the
+  secondary screen. The mode is off at every login and turns on in one click.
+- 🖼️ **Picture-in-picture on private workspaces.** From the Mirror/Private menu, keep a
+  small live copy of the secondary screen in a corner, clear of the top bar. Drag it to
+  another corner, double-click it to go to workspace 1.
 - 🪞 **Workspace 1 is the room's view.** A live copy of the secondary screen, scaled
   to fit with black bands, drawn under your top bar. Leave workspace 1 and it is
   gone; come back and it is there. It is a compositor clone, not a video capture:
@@ -82,8 +84,9 @@ slides stay up while you read your notes.
 
 The **Presentation** button sits in GNOME's Quick Settings menu, top right. Click it to
 turn the mode on or off (greyed out without a secondary screen); its arrow opens a
-menu with **Preferences**. The preferences window also opens from GNOME's Extensions
-app, like any extension's.
+menu with **Preferences**. While presenting, the **Mirror/Private** button in the top
+bar opens a menu with **Picture-in-picture** and **Preferences**. The preferences
+window also opens from GNOME's Extensions app, like any extension's.
 Two switches group the smart behaviors, so either can go back to plain GNOME. Options
 apply right away, even with the mode on.
 
@@ -95,17 +98,17 @@ apply right away, even with the mode on.
 | Smart windows                   | on        |
 | Do Not Disturb while presenting | on        |
 | Red border around the mirror    | on        |
-| Indicator position              | Right     |
 | Share window shortcut           | `Super+E` |
 
 With both smart options off, the mode is the live copy on workspace 1 and its top bar
 indicator, plus the shortcut and Do Not Disturb.
 
 **Red border around the mirror** — a thin red frame around the projected image on
-workspace 1, to make the shared area stand out. Only you see it, never the room.
+workspace 1 and around the picture-in-picture, to make the shared area stand out. Only
+you see it, never the room.
 
-**Indicator position** — *Right* keeps Mirror/Private with the system icons; *Center*
-puts it just left of the clock.
+**Picture-in-picture** (top bar menu) — 20 % of the screen width. Dropped anywhere, it
+snaps to the nearest corner. Its switch and its corner are kept between sessions.
 
 **Smart pointer** — moving from one screen to the other means dragging the pointer
 across the edge. With this on:
@@ -151,9 +154,8 @@ monitors works the same way.
 ## What it deliberately does NOT do
 
 No clicking through the copy: it is read-only, the room's screen is driven from the
-room's screen. No floating thumbnail, no picture-in-picture, no third screen. No
-resolution switching — GNOME's Settings › Displays does it already. No presenter
-timer, no laser pointer, no annotations.
+room's screen. No third screen. No resolution switching — GNOME's Settings › Displays
+does it already. No presenter timer, no laser pointer, no annotations.
 
 Small code, few settings: see [the spec](docs/specs/features.md) (in French) — §0
 (KISS) is the project's constitution, §3 lists what stays out.

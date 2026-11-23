@@ -93,7 +93,8 @@ corrige pas.
 - **Changer la résolution de l'écran secondaire** : c'est le rôle de Paramètres ›
   Écrans (essayé puis retiré : API D-Bus `Mutter.DisplayConfig` lourde et fragile
   pour un réglage que GNOME fait déjà).
-- Vignette flottante, picture-in-picture, retour redimensionnable ou déplaçable.
+- Picture-in-picture placé librement ou redimensionné à la souris : il s'aimante à un
+  coin et sa taille est fixe (§4.11).
 - Choix du bureau qui porte le retour : c'est **toujours le bureau 1**.
 - Activation automatique au branchement d'un écran : le bouton reste manuel.
 - Minuteur de présentation, notes, pointeur laser, annotations, zoom.
@@ -127,10 +128,8 @@ corrige pas.
           └──────────────────────────────────────┘
   ```
 
-- **Un indicateur dans la topbar, seulement mode allumé** : une icône suivie d'un mot,
-  **à droite** parmi les icônes système par défaut, ou **au centre**, juste à gauche de
-  l'heure (préférence `indicator-position`, deux choix : `Right`, `Center`). Il répond
-  à « la salle voit-elle le bureau que je regarde ? » :
+- **Un bouton dédié dans la topbar, seulement mode allumé**, à droite : une icône suivie
+  d'un mot. Il répond à « la salle voit-elle le bureau que je regarde ? » :
   - bureau 1 : écran et `Mirror` en **rouge**, ce bureau est ce que voit la salle ;
   - autre bureau : cadenas et `Private` en **vert**, ce bureau n'est pas répliqué.
 
@@ -138,22 +137,22 @@ corrige pas.
   et les fenêtres qui s'y trouvent. L'icône et le mot changent avec la couleur, pour
   rester lisibles sans distinguer le rouge du vert. Mode éteint, l'extension n'ajoute
   **rien** à la topbar.
-- Historique : un bouton dédié dans la topbar, toujours visible, portait d'abord le
-  menu. Les réglages rapides sont l'endroit standard d'un interrupteur de ce genre,
-  et une icône permanente pour un mode qu'on utilise en formation seulement
-  encombrait la topbar.
+- **Son menu** contient l'interrupteur **Picture-in-picture** (§4.11) et l'entrée
+  **Preferences**. Le mode s'allume et s'éteint dans les réglages rapides.
+- Historique : un bouton toujours visible portait d'abord le menu, mais une icône
+  permanente encombrait la topbar pour un mode utilisé en formation seulement. Il revient
+  uniquement mode allumé. Le choix de le placer au centre est retiré : le liseré rouge
+  (§4.2) marque mieux la zone partagée.
 
-- **Une fenêtre de préférences** (`prefs.js`, libadwaita), ouverte de deux
-  endroits : l'entrée « Preferences » du sous-menu, et le bouton réglages de
-  l'application Extensions de GNOME, comme pour toute extension.
-- Elle tient en **six lignes**, chacune avec une phrase qui dit ce qu'elle fait :
+- **Une fenêtre de préférences** (`prefs.js`, libadwaita), ouverte de trois
+  endroits : l'entrée « Preferences » du sous-menu, celle du bouton de la topbar, et le
+  bouton réglages de l'application Extensions de GNOME, comme pour toute extension.
+- Elle tient en **cinq lignes**, chacune avec une phrase qui dit ce qu'elle fait :
   - **Smart pointer** : la gestion intelligente du curseur (§4.6, §4.9) ;
   - **Smart windows** : la gestion intelligente des fenêtres (§4.6, §4.7, §4.8) ;
   - **Do Not Disturb while presenting** (§4.5) ;
-  - **Red border around the mirror** : le liseré rouge du retour (§4.2), activé par
-    défaut ;
-  - **Indicator position** : un bouton à deux états, `Center` (juste à gauche de
-    l'heure) à gauche et `Right` à droite, sélectionné par défaut ;
+  - **Red border around the mirror** : le liseré rouge du retour et du picture-in-picture
+    (§4.2, §4.11), activé par défaut ;
   - **Share window shortcut** : la combinaison du raccourci (§4.4). On clique la ligne
     et on presse la nouvelle combinaison (au moins un modificateur, Retour arrière
     remet `Super+E`, Échap annule).
@@ -454,6 +453,33 @@ secondaire, donc dans la vue d'ensemble de l'écran secondaire, que l'on ne voit
   vignettes de bureaux en haut de la vue d'ensemble (`workspaceThumbnail.js`, un
   autre filtre) ne sont pas touchées : celle du bureau 1 reste vide.
 
+### 4.11 Le picture-in-picture
+
+Sur un bureau privé, une petite copie live de l'écran secondaire garde la salle sous les
+yeux.
+
+- **On l'active dans le menu du bouton de la topbar.** Ce choix est **mémorisé**
+  (`pip-enabled`, désactivé par défaut) : s'il était actif, il revient à l'allumage du
+  mode, y compris après une déconnexion.
+- **Visible sur les bureaux privés seulement**, jamais sur le bureau 1 ni en vue
+  d'ensemble. Il reste en place pendant le glissement entre bureaux.
+- **Dans un coin de la zone de travail**, à 16 px des bords : il ne chevauche jamais la
+  topbar ni un dock fixe. En bas à droite au départ.
+- **On le déplace au glisser-déposer** : il suit la souris dans la zone de travail et
+  s'aimante au **coin le plus proche** au lâcher. Le coin est mémorisé (`pip-corner`,
+  sans ligne dans les préférences).
+- **Un double-clic dedans passe sur le bureau 1.**
+- **Sa largeur est fixe** : 20 % de la zone de travail. Plus grand, il rend le bureau
+  privé inutilisable ; aucun réglage.
+- **Il garde le ratio** de l'écran secondaire, sans bandes noires, et sa hauteur reste
+  dans la zone de travail.
+- **Il capte la souris** pour ces deux gestes : un clic ne traverse pas vers la fenêtre
+  en dessous, et rien n'est transmis à l'écran secondaire.
+- Il montre la **pastille** du curseur, et le **liseré rouge** quand `mirror-border` est
+  activé (§4.2).
+- Limites acceptées : il masque un coin du bureau privé, il apparaît dans un partage
+  d'écran du **principal**, et c'est une seconde copie à peindre tant qu'il est visible.
+
 ---
 
 ## 5. Technique
@@ -469,6 +495,7 @@ Main.layoutManager.uiGroup
 │   └── viewport (clip)
 │       ├── Clutter.Clone    ◄── scale s, translaté de (-sec.x·s, -sec.y·s)
 │       └── pastille curseur
+├── pip (St.Widget)          ◄── sous-classe, déplaçable (§4.11)
 ├── panelBox, popups, OSD…   ◄── restent au-dessus du retour
 ```
 
@@ -486,6 +513,8 @@ Main.layoutManager.uiGroup
 `mirror.visible = allumé && bureau actif == 0 && !Main.overview.visible && !glissement`
 
 Pendant une animation de changement de bureau, c'est la copie qui glisse (§4.2).
+
+`pip.visible = activé && bureau actif != 0 && !Main.overview.visible`
 
 Signaux : `global.workspace_manager` `active-workspace-changed`, `Main.overview`
 `showing`/`hidden`, `Main.layoutManager` `monitors-changed` (recalcul de la
@@ -530,17 +559,16 @@ secondaire → position de la pastille. Connecté seulement mode allumé.
 
 Un `QuickSettings.SystemIndicator` ajouté par
 `Main.panel.statusArea.quickSettings.addExternalIndicator()` — l'API publique des
-extensions pour les réglages rapides. Il porte :
+extensions pour les réglages rapides. Il porte
+un `QuickMenuToggle` dans `quickSettingsItems` : `checked` suit le mode, `reactive` à
+`false` et sous-titre « No secondary screen » sans écran secondaire ; son menu a un
+en-tête (`setHeader`) et l'entrée Preferences (`extension.openPreferences()`).
 
-- l'icône de la topbar (`_addIndicator()`) et son libellé, visibles seulement mode
-  allumé : rouge `#e01b24` sur le bureau 1, vert `#33d17a` ailleurs (classes
-  `presentation-indicator` et `presentation-mirrored`). Au centre, ils sont portés par
-  un `PanelMenu.Button` sans menu, ajouté en position 0 de la boîte centrale
-  (`Main.panel.addToStatusArea`, API publique), donc à gauche de l'heure ;
-- un `QuickMenuToggle` dans `quickSettingsItems` : `checked` suit le mode,
-  `reactive` à `false` et sous-titre « No secondary screen » sans écran secondaire ;
-  son menu a un en-tête (`setHeader`) et l'entrée Preferences
-  (`extension.openPreferences()`).
+Mode allumé, un `PanelMenu.Button` est ajouté à la boîte de droite
+(`Main.panel.addToStatusArea`, API publique) et détruit à l'extinction. Il porte l'icône
+et le libellé, rouge `#e01b24` sur le bureau 1, vert `#33d17a` ailleurs (classes
+`presentation-indicator` et `presentation-mirrored`), et un menu avec un
+`PopupSwitchMenuItem` pour le picture-in-picture et l'entrée Preferences.
 
 ### 5.8 Carte des risques
 
@@ -553,7 +581,9 @@ extensions pour les réglages rapides. Il porte :
 | Clone d'un plein écran   | `global.compositor.disable_unredirect` | faible                |
 | Position du curseur      | `Meta.CursorTracker`, publique         | faible                |
 | Réglages rapides         | `addExternalIndicator`, publique       | faible                |
-| Indicateur au centre     | `addToStatusArea`, publique            | faible                |
+| Bouton de la topbar      | `addToStatusArea`, publique            | faible                |
+| Picture-in-picture       | même clone, `uiGroup`                  | faible                |
+| Glisser du PiP           | `global.stage.grab`, publique          | moyen, grab libéré    |
 | Raccourci                | `Main.wm.addKeybinding`                | faible                |
 | Ne pas déranger          | GSettings, publique                    | faible                |
 | Alt+Tab sur le bureau 1  | GSettings, relue à chaque Alt+Tab      | faible                |
@@ -572,7 +602,8 @@ extensions pour les réglages rapides. Il porte :
 | `src/extension.js`          | `enable()` / `disable()`, raccourci              |
 | `src/mode.js`               | état du mode, visibilité, DND, bureau 1, curseur |
 | `src/mirror.js`             | le retour : clone, géométrie, pastille           |
-| `src/indicator.js`          | réglages rapides et indicateur de la topbar      |
+| `src/pip.js`                | picture-in-picture : glisser, double-clic        |
+| `src/indicator.js`          | réglages rapides et bouton de la topbar          |
 | `src/prefs.js`              | fenêtre de préférences (§4.1, §6)                |
 | `src/topedge.js`            | bord haut ↔ topbar (§4.9)                        |
 | `src/geometry.js`           | calculs purs, sans `gi://`, testés sous node     |
@@ -594,7 +625,8 @@ groupe se coupe d'un coup pour retrouver GNOME standard.
 | `share-window`       | as   | `['<Super>e']`        | la combinaison du raccourci         | oui         |
 | `mute-notifications` | bool | `true`                | Ne pas déranger auto (§4.5)         | oui         |
 | `mirror-border`      | bool | `true`                | liseré rouge du retour (§4.2)       | oui         |
-| `indicator-position` | s    | `'right'`             | position de l'indicateur (§4.1)     | oui         |
+| `pip-enabled`        | bool | `false`               | picture-in-picture (§4.11)          | menu        |
+| `pip-corner`         | s    | `'bottom-right'`      | coin choisi au glisser (§4.11)      | non         |
 | `banners-muted`      | bool | `false`               | état interne de §4.5                | non         |
 | `switcher-forced`    | bool | `false`               | état interne de §4.8                | non         |
 
@@ -614,9 +646,9 @@ groupe se coupe d'un coup pour retrouver GNOME standard.
 Pas d'option de **paramétrage fin** au-delà : le bureau du retour (toujours le 1),
 la couleur de la pastille (accent), le choix de l'écran secondaire (le premier non
 principal) sont des choix de l'extension. Un comportement se coupe, il ne se
-configure pas — deux exceptions : la combinaison du raccourci (§4.1, §4.4), une touche
-étant une affaire de doigts, et la position de l'indicateur (§4.1), limitée à deux
-choix.
+configure pas — une exception : la combinaison du raccourci (§4.1, §4.4), une touche
+étant une affaire de doigts. Le coin du picture-in-picture se choisit en le déplaçant
+(§4.11).
 
 ---
 

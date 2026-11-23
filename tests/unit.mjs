@@ -4,7 +4,8 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 
 import {
-    center, contains, letterbox, mirrorView, pointerTarget, returnWorkspace, toMirrorPoint,
+    center, contains, letterbox, mirrorView, nearestCorner, pipRect, pointerTarget,
+    returnWorkspace, toMirrorPoint,
     toMirrorX, toSecondaryPoint, toSecondaryX, topEdge,
 } from '../src/geometry.js';
 
@@ -14,6 +15,36 @@ test('toMirrorPoint / toSecondaryPoint: the pointer keeps its place in the mirro
     const shown = toMirrorPoint(view, secondary, 960, 600);
     assert.deepEqual(shown, {x: view.x + 1120, y: view.y + 700});
     assert.deepEqual(toSecondaryPoint(view, secondary, shown.x, shown.y), {x: 960, y: 600});
+});
+
+test('pipRect: each corner of the work area, with its margin, below the top bar', () => {
+    const workArea = {x: 100, y: 32, width: 1920, height: 1048};
+    const secondary = {x: 0, y: 0, width: 1920, height: 1080};
+    const at = corner => {
+        const {x, y} = pipRect(workArea, secondary, corner, 20, 16);
+        return [x, y];
+    };
+    assert.deepEqual(pipRect(workArea, secondary, 'top-left', 20, 16),
+        {x: 116, y: 48, width: 384, height: 216});
+    assert.deepEqual(at('top-right'), [1620, 48]);
+    assert.deepEqual(at('bottom-left'), [116, 848]);
+    assert.deepEqual(at('bottom-right'), [1620, 848]);
+});
+
+test('nearestCorner: a drop goes to the closest corner of the work area', () => {
+    const workArea = {x: 100, y: 32, width: 1000, height: 800};
+    assert.equal(nearestCorner(workArea, 200, 100), 'top-left');
+    assert.equal(nearestCorner(workArea, 1000, 100), 'top-right');
+    assert.equal(nearestCorner(workArea, 200, 700), 'bottom-left');
+    assert.equal(nearestCorner(workArea, 1000, 700), 'bottom-right');
+});
+
+test('pipRect: a portrait secondary screen stays within the work area height', () => {
+    const workArea = {x: 0, y: 32, width: 1920, height: 1048};
+    const rect = pipRect(workArea, {x: 0, y: 0, width: 1080, height: 1920}, 'bottom-right', 40, 16);
+    assert.equal(rect.height, 1016);
+    assert.equal(rect.y, 48);
+    assert.equal(rect.width, Math.round(1080 * 1016 / 1920));
 });
 
 test('toSecondaryPoint: black bands map to the edges, never onto the top row', () => {

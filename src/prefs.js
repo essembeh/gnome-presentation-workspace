@@ -20,13 +20,8 @@ const SWITCHES = [
         'Notification banners stay off while the mode is on, and your previous ' +
         'setting comes back afterwards, even after a crash of GNOME Shell.'],
     ['mirror-border', 'Red border around the mirror',
-        'A thin red frame around the projected image on workspace 1, to make the shared ' +
-        'area stand out. Only you see it, never the room.'],
-];
-
-const POSITIONS = [
-    ['center', 'Center'],
-    ['right', 'Right'],
+        'A thin red frame around the projected image on workspace 1 and the ' +
+        'picture-in-picture. Only you see it, never the room.'],
 ];
 
 export default class PresentationWorkspacePrefs extends ExtensionPreferences {
@@ -48,23 +43,7 @@ export default class PresentationWorkspacePrefs extends ExtensionPreferences {
             settings.bind(key, row, 'active', Gio.SettingsBindFlags.DEFAULT);
             group.add(row);
         }
-        group.add(this._positionRow(settings));
         group.add(this._shortcutRow(window, settings));
-    }
-
-    _positionRow(settings) {
-        const row = new Adw.ActionRow({
-            title: 'Indicator position',
-            subtitle: 'Where the top bar shows Mirror or Private while the mode is on. ' +
-                'Center is just left of the clock.',
-        });
-        const toggles = new Adw.ToggleGroup({valign: Gtk.Align.CENTER});
-        for (const [name, label] of POSITIONS)
-            toggles.add(new Adw.Toggle({name, label}));
-        settings.bind('indicator-position', toggles, 'active-name',
-            Gio.SettingsBindFlags.DEFAULT);
-        row.add_suffix(toggles);
-        return row;
     }
 
     /** The share-window key: click, then press the new combination. */

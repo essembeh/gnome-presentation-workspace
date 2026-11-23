@@ -24,16 +24,23 @@
     <key name="mirror-border" type="b">
       <default>true</default>
       <summary>Red border around the mirror</summary>
-      <description>Draws a thin red frame around the projected image on workspace 1. It is part of the mirror: the secondary screen never shows it.</description>
+      <description>Draws a thin red frame around the projected image on workspace 1 and the picture-in-picture. The secondary screen never shows it.</description>
     </key>
-    <key name="indicator-position" type="s">
+    <key name="pip-enabled" type="b">
+      <default>false</default>
+      <summary>Picture-in-picture</summary>
+      <description>Set from the top bar menu. Shows a small live copy of the secondary screen on private workspaces while the mode is on.</description>
+    </key>
+    <key name="pip-corner" type="s">
       <choices>
-        <choice value="right"/>
-        <choice value="center"/>
+        <choice value="top-left"/>
+        <choice value="top-right"/>
+        <choice value="bottom-left"/>
+        <choice value="bottom-right"/>
       </choices>
-      <default>'right'</default>
-      <summary>Position of the Mirror/Private indicator</summary>
-      <description>Where the top bar shows the state while the mode is on: right (with the system icons) or center (just left of the clock).</description>
+      <default>'bottom-right'</default>
+      <summary>Internal: picture-in-picture corner</summary>
+      <description>The corner it was last dragged to, kept between sessions.</description>
     </key>
     <key name="banners-muted" type="b">
       <default>false</default>
