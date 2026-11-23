@@ -47,11 +47,20 @@ export default class PresentationWorkspaceExtension extends Extension {
         const manager = global.workspace_manager;
         if (window.get_monitor() !== secondary.index) {
             this._origins.set(window, window.get_workspace());
+            const follow = this._mode.active && this._settings.get_boolean('smart-windows');
+            const time = global.get_current_time();
+            // On workspace 1 first: a fullscreen window changes monitor asynchronously, and
+            // activating it on its old workspace would switch back there.
+            if (follow) {
+                window.change_workspace_by_index(0, false);
+                manager.get_workspace_by_index(0).activate(time);
+            }
             window.move_to_monitor(secondary.index);
+            if (follow)
+                window.activate(time);
             return;
         }
 
-        window.move_to_monitor(Main.layoutManager.primaryIndex);
         const origin = this._origins.get(window);
         // -1 when that workspace is gone (dynamic workspaces remove empty ones).
         const originIndex = Array.from({length: manager.n_workspaces}, (_, i) => i)
@@ -59,7 +68,13 @@ export default class PresentationWorkspaceExtension extends Extension {
         const index = returnWorkspace(originIndex,
             manager.get_active_workspace_index(), manager.n_workspaces, this._mode.active);
         this._origins.delete(window);
-        window.change_workspace_by_index(index, false);
-        window.activate(global.get_current_time());
+
+        // A fullscreen Wayland window changes monitor only once the client answers, and
+        // then lands on the active workspace: that one must already be the target.
+        const time = global.get_current_time();
+        this._mode.keepFocusOn(window);
+        manager.get_workspace_by_index(index).activate(time);
+        window.move_to_monitor(Main.layoutManager.primaryIndex);
+        window.activate(time);
     }
 }

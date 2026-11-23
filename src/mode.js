@@ -82,6 +82,7 @@ export class PresentationMode extends Signals.EventEmitter {
         this._overviewInjections = new InjectionManager();
         this._gestureInjections = new InjectionManager();
         this._sliding = false;
+        this._keptFocus = null;
         this._cursorTracker = global.backend.get_cursor_tracker();
         this._seat = global.stage.get_context().get_backend().get_default_seat();
 
@@ -187,6 +188,7 @@ export class PresentationMode extends Signals.EventEmitter {
         this._overviewInjections.clear();
         this._gestureInjections.clear();
         this._sliding = false;
+        this._keptFocus = null;
         restoreOverrides(this._settings);
         this.emit('changed');
     }
@@ -435,6 +437,12 @@ export class PresentationMode extends Signals.EventEmitter {
         this._seat.warp_pointer(point.x, point.y);
     }
 
+    /** A window coming back from the secondary screen may still be on it when focus is decided. */
+    keepFocusOn(window) {
+        if (this._active && global.workspace_manager.get_active_workspace_index() === 0)
+            this._keptFocus = window;
+    }
+
     /** Decided after the switch: a window activated along with it keeps the focus. */
     _queueFocusPrimary() {
         const id = global.compositor.get_laters().add(Meta.LaterType.BEFORE_REDRAW, () => {
@@ -449,8 +457,10 @@ export class PresentationMode extends Signals.EventEmitter {
     _focusPrimary() {
         const manager = global.workspace_manager;
         const focused = global.display.focus_window;
+        const kept = this._keptFocus;
+        this._keptFocus = null;
         if (!this._active || Main.overview.visible || manager.get_active_workspace_index() === 0 ||
-            focused?.get_monitor() !== secondaryMonitor()?.index)
+            focused === kept || focused?.get_monitor() !== secondaryMonitor()?.index)
             return;
         const {primaryIndex} = Main.layoutManager;
         const window = global.display.get_tab_list(Meta.TabList.NORMAL, manager.get_active_workspace())

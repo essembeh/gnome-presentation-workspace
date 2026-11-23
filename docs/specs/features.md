@@ -232,7 +232,10 @@ notification (§4.5), la gestion du curseur (§4.6, §4.9) et celle des fenêtre
 ### 4.4 Raccourci partager / reprendre
 
 - Un raccourci clavier agit sur **la fenêtre qui a le focus** :
-  - elle est sur l'écran principal → envoyée sur l'écran secondaire ;
+  - elle est sur l'écran principal → envoyée sur l'écran secondaire. **Mode allumé avec
+    `smart-windows`, on la suit sur le bureau 1** et elle garde le focus : on voit ce
+    qu'on vient de montrer, et le clavier ne vise jamais une fenêtre projetée depuis un
+    bureau privé. Mode éteint ou `smart-windows` coupé, on reste sur le bureau courant ;
   - elle est sur l'écran secondaire → ramenée sur l'écran principal, **sur le
     bureau d'où elle était partie**, et activée (on bascule sur ce bureau). On retient
     le **bureau lui-même**, pas son numéro : l'insertion du bureau du retour (§4.2)
@@ -240,6 +243,16 @@ notification (§4.5), la gestion du curseur (§4.6, §4.9) et celle des fenêtre
     (fenêtre ouverte directement sur l'écran secondaire, bureau disparu), le bureau
     courant — **jamais le bureau 1 quand le mode est allumé** : elle serait cachée
     sous le retour ; elle va alors sur le bureau 2.
+- **Au retour, on bascule d'abord sur le bureau cible, puis on déplace la fenêtre.**
+  Une fenêtre Wayland en plein écran ne change d'écran qu'après la réponse de
+  l'application : tant qu'elle est sur l'écran secondaire, Mutter ignore tout changement
+  de bureau, puis la pose sur le **bureau actif**. Sur le bureau 1, elle serait renvoyée
+  sur l'écran secondaire (§4.7). Elle garde le focus malgré §4.6.
+- **À l'envoi, la fenêtre passe d'abord sur le bureau 1**, pour la même raison : en plein
+  écran, elle y reste jusqu'à son arrivée sur l'écran secondaire, au lieu de ramener
+  GNOME sur son ancien bureau quand on l'active.
+- Un bureau dynamique que la fenêtre laissait vide disparaît quand on le quitte : le
+  retour suit alors la règle du bureau disparu.
 - Défaut : **`Super+E`** (« écran » ; `Super+P` est déjà le sélecteur d'affichage
   de GNOME). **Modifiable dans les préférences** (§4.1), clé `share-window`. Pas
   d'interrupteur : inutilisé, il ne gêne pas ; en conflit, on change la touche.

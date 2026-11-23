@@ -119,7 +119,8 @@ gresource extract "$(ls "$d"/lib/gnome-shell/libshell-*.so | head -1)" \
 - **Mirror:** live, ratio kept with black bands, blue dot on the pointer, top bar and
   menus above it, clicks ignored. Workspace 1 survives while empty. Windows already on
   it move to workspace 2 when the mode turns on.
-- **Windows:** the share shortcut sends a window and brings it back to its workspace.
+- **Windows:** the share shortcut sends a window and follows it to workspace 1 (mode on
+  with Smart windows, also fullscreen), then brings it back to its workspace.
   A window opened on workspace 1 goes to the secondary screen.
 - **Top edge:** a push along the whole width reaches the top bar at the matching spot,
   without opening the overview. Going down returns to the secondary screen, also after

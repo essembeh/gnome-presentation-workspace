@@ -66,8 +66,9 @@ slides stay up while you read your notes.
   windows slide one workspace to the right, untouched.
 - 🎞️ **Fullscreen slides keep moving.** A fullscreen window on the secondary screen
   normally bypasses the compositor and would freeze the copy; not while presenting.
-- ⌨️ **`Super+E` shares the focused window** — sends it to the secondary screen,
-  or brings it back to the workspace it came from. The key can be changed.
+- ⌨️ **`Super+E` shares the focused window** — sends it to the secondary screen and
+  follows it to workspace 1, or brings it back to the workspace it came from. The key
+  can be changed.
 - ⬆️ **Push the top edge to reach the top bar.** On workspace 1, push the pointer
   against the top of the secondary screen: it lands on your top bar, right above its
   place in the copy. Go back down and it returns to the secondary screen.
@@ -129,9 +130,10 @@ across the edge. With this on:
   stays private.
 
 **The shortcut** — `Super+E` on a window of the primary screen sends it to the
-secondary screen; on a window of the secondary screen, brings it back to the workspace
-it came from and switches there (never to workspace 1 while presenting). It works
-whether the mode is on or not. GNOME already has `Super+Shift+←/→`; this one needs no
+secondary screen and, while presenting with Smart windows on, follows it to workspace
+1. On a window of the secondary screen, it brings it back to the workspace it came from
+and switches there (never to workspace 1 while presenting). It works whether the mode
+is on or not. GNOME already has `Super+Shift+←/→`; this one needs no
 thinking about which side the screen is on. To change the key, click its row in the
 preferences and press the new combination (Backspace restores `Super+E`).
 
