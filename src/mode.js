@@ -113,6 +113,7 @@ export class PresentationMode extends Signals.EventEmitter {
         this._mirror = new Mirror();
         Main.layoutManager.uiGroup.insert_child_above(this._mirror, global.window_group);
         this._updateGeometry();
+        this._syncBorder();
 
         // A fullscreen window on the secondary screen would bypass the compositor and
         // freeze the clone.
@@ -146,7 +147,8 @@ export class PresentationMode extends Signals.EventEmitter {
             force(this._settings, 'banners');
         this._settings.connectObject(
             'changed::smart-windows', () => this._syncSwitcher(),
-            'changed::smart-pointer', () => this._syncTopEdge(), this);
+            'changed::smart-pointer', () => this._syncTopEdge(),
+            'changed::mirror-border', () => this._syncBorder(), this);
         this._syncSwitcher();
         this._syncTopEdge();
         this.emit('changed');
@@ -366,6 +368,7 @@ export class PresentationMode extends Signals.EventEmitter {
                 secondaryMonitor());
             const [pointerX, pointerY] = global.get_pointer();
             copy.setPointer(pointerX, pointerY);
+            copy.setBorder(this._settings.get_boolean('mirror-border'));
             copy.visible = true;
             group.add_child(copy);
             this._sliding = true;
@@ -470,6 +473,10 @@ export class PresentationMode extends Signals.EventEmitter {
             window.activate(time);
         else
             global.display.unset_input_focus(time);
+    }
+
+    _syncBorder() {
+        this._mirror.setBorder(this._settings.get_boolean('mirror-border'));
     }
 
     _updateGeometry() {

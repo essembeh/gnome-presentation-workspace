@@ -23,6 +23,9 @@ class Mirror extends St.Widget {
         this._clone = new Clutter.Clone({source: global.window_group});
         this._viewport.add_child(this._clone);
 
+        this._border = new St.Widget({style_class: 'presentation-border', visible: false});
+        this._viewport.add_child(this._border);
+
         this._dot = new St.Widget({
             style_class: 'presentation-cursor',
             width: DOT_SIZE,
@@ -45,8 +48,14 @@ class Mirror extends St.Widget {
         this._scale = fit.scale;
         this._viewport.set_position(fit.x, fit.y);
         this._viewport.set_size(fit.width, fit.height);
+        this._border.set_size(fit.width, fit.height);
         this._clone.set_scale(fit.scale, fit.scale);
         this._clone.set_position(-secondary.x * fit.scale, -secondary.y * fit.scale);
+    }
+
+    /** The optional red frame around the projected image. */
+    setBorder(visible) {
+        this._border.visible = visible;
     }
 
     /** Moves the cursor dot to a stage position, hidden outside the secondary monitor. */

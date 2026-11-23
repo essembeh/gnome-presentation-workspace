@@ -2,6 +2,10 @@
     background-color: black;
 }
 
+.presentation-border {
+    border: 2px solid #e01b24;
+}
+
 .presentation-cursor {
     border-radius: 9px;
     border: 2px solid white;

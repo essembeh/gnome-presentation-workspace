@@ -21,6 +21,11 @@
       <summary>Do Not Disturb while presenting</summary>
       <description>Turn notification banners off while the presentation mode is on, and restore them after.</description>
     </key>
+    <key name="mirror-border" type="b">
+      <default>true</default>
+      <summary>Red border around the mirror</summary>
+      <description>Draws a thin red frame around the projected image on workspace 1. It is part of the mirror: the secondary screen never shows it.</description>
+    </key>
     <key name="indicator-position" type="s">
       <choices>
         <choice value="right"/>

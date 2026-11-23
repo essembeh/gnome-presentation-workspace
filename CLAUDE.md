@@ -41,8 +41,9 @@ all apply here.
 - **A setting exists only if turning it off has a real use.** Side behaviors are
   grouped by intent, on by default: `smart-pointer` (pointer follows, swipe from the
   secondary screen, overview, top edge) and `smart-windows` (auto-share, Alt+Tab,
-  keyboard leaving projected windows). Do Not Disturb has its own switch. The mirror,
-  its dot, its slide and overview preview, and the top bar state are not optional.
+  keyboard leaving projected windows). Do Not Disturb has its own switch, and so has
+  the mirror's red border (on by default). The mirror, its dot, its slide and overview
+  preview, and the top bar state are not optional.
   Settings switch a behavior off; they do not tune it — the share-window key
   combination and the top bar state's position are the only exceptions.
 - **Quick Settings holds the mode switch and "Preferences" only**; the extension adds
@@ -117,8 +118,9 @@ gresource extract "$(ls "$d"/lib/gnome-shell/libshell-*.so | head -1)" \
   mode off, left of the clock or at the right depending on the preference, which applies
   right away. Unplugging the screen turns the mode off.
 - **Mirror:** live, ratio kept with black bands, blue dot on the pointer, top bar and
-  menus above it, clicks ignored. Workspace 1 survives while empty. Windows already on
-  it move to workspace 2 when the mode turns on.
+  menus above it, clicks ignored. The optional red border frames the projected image,
+  slides with it, and never reaches the secondary screen. Workspace 1 survives while
+  empty. Windows already on it move to workspace 2 when the mode turns on.
 - **Windows:** the share shortcut sends a window and follows it to workspace 1 (mode on
   with Smart windows, also fullscreen), then brings it back to its workspace.
   A window opened on workspace 1 goes to the secondary screen.

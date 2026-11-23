@@ -94,11 +94,15 @@ apply right away, even with the mode on.
 | Smart pointer                   | on        |
 | Smart windows                   | on        |
 | Do Not Disturb while presenting | on        |
+| Red border around the mirror    | on        |
 | Indicator position              | Right     |
 | Share window shortcut           | `Super+E` |
 
 With both smart options off, the mode is the live copy on workspace 1 and its top bar
 indicator, plus the shortcut and Do Not Disturb.
+
+**Red border around the mirror** — a thin red frame around the projected image on
+workspace 1, to make the shared area stand out. Only you see it, never the room.
 
 **Indicator position** — *Right* keeps Mirror/Private with the system icons; *Center*
 puts it just left of the clock.

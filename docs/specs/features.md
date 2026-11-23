@@ -146,10 +146,12 @@ corrige pas.
 - **Une fenêtre de préférences** (`prefs.js`, libadwaita), ouverte de deux
   endroits : l'entrée « Preferences » du sous-menu, et le bouton réglages de
   l'application Extensions de GNOME, comme pour toute extension.
-- Elle tient en **cinq lignes**, chacune avec une phrase qui dit ce qu'elle fait :
+- Elle tient en **six lignes**, chacune avec une phrase qui dit ce qu'elle fait :
   - **Smart pointer** : la gestion intelligente du curseur (§4.6, §4.9) ;
   - **Smart windows** : la gestion intelligente des fenêtres (§4.6, §4.7, §4.8) ;
   - **Do Not Disturb while presenting** (§4.5) ;
+  - **Red border around the mirror** : le liseré rouge du retour (§4.2), activé par
+    défaut ;
   - **Indicator position** : un bouton à deux états, `Center` (juste à gauche de
     l'heure) à gauche et `Right` à droite, sélectionné par défaut ;
   - **Share window shortcut** : la combinaison du raccourci (§4.4). On clique la ligne
@@ -206,6 +208,10 @@ notification (§4.5), la gestion du curseur (§4.6, §4.9) et celle des fenêtre
   fenêtres (décalées d'un cran).
 - Avec des **bureaux statiques**, l'insertion est impossible (`insertWorkspace` ne
   fait rien) : les fenêtres restent cachées sous le retour.
+- **Un liseré rouge optionnel** (`mirror-border`, activé par défaut) entoure l'image
+  projetée pour mieux délimiter la zone partagée : 2 px, le rouge de `Mirror`, dessiné à
+  l'intérieur de l'image, bandes noires exclues. Il fait partie du retour : il glisse
+  avec lui, et la salle ne le voit jamais.
 - **Il capte les clics** et ne les transmet à rien.
 - **Le bureau 1 est maintenu en vie** tant que le mode est allumé : avec les
   bureaux dynamiques, GNOME supprime un bureau vide qui n'est pas le dernier, ce qui
@@ -587,6 +593,7 @@ groupe se coupe d'un coup pour retrouver GNOME standard.
 | `smart-windows`      | bool | `true`                | gestion des fenêtres (§4.7, §4.8)   | oui         |
 | `share-window`       | as   | `['<Super>e']`        | la combinaison du raccourci         | oui         |
 | `mute-notifications` | bool | `true`                | Ne pas déranger auto (§4.5)         | oui         |
+| `mirror-border`      | bool | `true`                | liseré rouge du retour (§4.2)       | oui         |
 | `indicator-position` | s    | `'right'`             | position de l'indicateur (§4.1)     | oui         |
 | `banners-muted`      | bool | `false`               | état interne de §4.5                | non         |
 | `switcher-forced`    | bool | `false`               | état interne de §4.8                | non         |

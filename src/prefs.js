@@ -19,6 +19,9 @@ const SWITCHES = [
     ['mute-notifications', 'Do Not Disturb while presenting',
         'Notification banners stay off while the mode is on, and your previous ' +
         'setting comes back afterwards, even after a crash of GNOME Shell.'],
+    ['mirror-border', 'Red border around the mirror',
+        'A thin red frame around the projected image on workspace 1, to make the shared ' +
+        'area stand out. Only you see it, never the room.'],
 ];
 
 const POSITIONS = [
